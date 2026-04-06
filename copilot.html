@@ -41,12 +41,15 @@
       min-height: 100dvh;
       padding-bottom: 80px;
     }
+    
+    /* POPRAWKA NR 3: dodano flex: 1 */
     .app {
-      min-height: calc(100vh - 80px);
+      flex: 1; 
       display: flex;
       flex-direction: column;
       width: 100%;
     }
+    
     .glass {
       background: var(--glass);
       border: 1px solid var(--border);
@@ -179,12 +182,25 @@
       justify-content: center;
       gap: 2px;
       cursor: pointer;
+      transition: all 0.2s;
     }
+    
+    /* STYLE DLA STANU ŁADOWANIA (POPRAWKA NR 2, 5, 6) */
     .btn-nav.primary {
       background: rgba(56,189,248,0.25);
       border-color: rgba(56,189,248,0.8);
       color: #fff;
     }
+    .btn-nav.primary.loading {
+      opacity: 0.5;
+      pointer-events: none;
+      background: rgba(15,23,42,0.9);
+      border-color: var(--border);
+    }
+    .btn-nav.primary .loader-text { display: none; }
+    .btn-nav.primary .start-text { display: block; }
+    .btn-nav.primary.loading .loader-text { display: block; color: #fbbf24; }
+    .btn-nav.primary.loading .start-text { display: none; }
 
     /* -------------------------------------------------------
        MODALS
@@ -320,7 +336,10 @@
 
   <div class="nav">
     <div class="nav-inner">
-      <div class="btn-nav primary" id="btnStart">▶ Start</div>
+      <div class="btn-nav primary loading" id="btnStart" disabled>
+        <span class="loader-text">⏳ Pogoda...</span>
+        <span class="start-text">▶ Start</span>
+      </div>
       <div class="btn-nav" id="btnCharts">📊 Wykres</div>
       <div class="btn-nav" id="btnHistory">📁 Historia</div>
       <div class="btn-nav" id="btnSave">💾 Zapisz</div>
@@ -516,7 +535,8 @@
       return `00:${pad(m)}:${pad(ss)}`;
     }
 
-    const minutesFromStart = () => Math.max(0, elapsedSeconds / 60);
+    // POPRAWKA NR 1: Używamy Math.floor zamiast samego dzielenia
+    const minutesFromStart = () => Math.floor(elapsedSeconds / 60);
 
     function enableMainButtons(on) {
       [btnRzut, btnBranie, btnRyba].forEach(b => {
@@ -558,8 +578,14 @@
     }
 
     // -------------------------------------------------------
-    // WEATHER
+    // WEATHER & START BUTTON UNLOCK
     // -------------------------------------------------------
+    // Funkcja pomocnicza: zdejmuje blokadę "Ładowanie pogody" z przycisku
+    function unlockStartButton() {
+      btnStart.classList.remove("loading");
+      btnStart.removeAttribute("disabled");
+    }
+
     function windDirText(deg) {
       if (deg == null || isNaN(deg)) return "--";
       const dirs = ["N","NE","E","SE","S","SW","W","NW"];
@@ -573,7 +599,7 @@
       fetch(url)
         .then(r => r.json())
         .then(d => {
-          if (!d || !d.current) return;
+          if (!d || !d.current) { unlockStartButton(); return; }
           const c = d.current;
           const temp = c.temperature_2m;
           const press = c.pressure_msl;
@@ -586,8 +612,14 @@
             `Ciśnienie: ${press.toFixed(0)} hPa · Wiatr: ${windKmh.toFixed(1)} km/h ${dir}`;
 
           lastWeather = { temp, press, wind: windKmh, dir };
+          
+          // POPRAWKA NR 2 i 5: ODBLOKUJ PRZYCISK START
+          unlockStartButton();
         })
-        .catch(() => {});
+        .catch(() => {
+          // Jeśli API padnie, pozwól łowić i odblokuj przycisk!
+          unlockStartButton();
+        });
     }
 
     function initWeather() {
@@ -600,6 +632,9 @@
       } else {
         fetchWeather(50.0647, 19.9450);
       }
+      
+      // Zabezpieczenie: jeśli coś utknie, odblokuj start po 4 sekundach awaryjnie
+      setTimeout(unlockStartButton, 4000);
     }
 
     // -------------------------------------------------------
@@ -618,7 +653,7 @@
     function startTimers() {
       if (timersRunning) return;
       timersRunning = true;
-      btnStart.textContent = "⏸ Pauza";
+      btnStart.querySelector('.start-text').textContent = "⏸ Pauza";
       enableMainButtons(true);
 
       if (lastWeather && typeof lastWeather.press === "number") {
@@ -657,18 +692,28 @@
               p: lastWeather.press
             });
           }
-          initWeather();
+          // Uwaga: wywołanie initWeather w pętli znów zablokowałoby START,
+          // więc odpytujemy API bez resetowania stanu UI.
+          if (navigator.geolocation) {
+              navigator.geolocation.getCurrentPosition(
+                  pos => fetchWeather(pos.coords.latitude, pos.coords.longitude),
+                  () => fetchWeather(50.0647, 19.9450)
+              );
+          } else {
+              fetchWeather(50.0647, 19.9450);
+          }
         }, 15 * 60 * 1000);
       }
     }
 
     function pauseTimers() {
       timersRunning = false;
-      btnStart.textContent = "▶ Start";
+      btnStart.querySelector('.start-text').textContent = "▶ Start";
       enableMainButtons(false);
     }
 
     function toggleStart() {
+      if (btnStart.hasAttribute('disabled')) return; // blokada podczas ładowania
       if (timersRunning) pauseTimers();
       else startTimers();
     }
@@ -878,7 +923,7 @@
               ticks: { color: "#9ca3af" },
               grid: { color: "rgba(55,65,81,0.6)" }
             },
-           y: {
+            y: {
               type: "linear",
               min: 0,
               max: 4,
@@ -961,7 +1006,6 @@
         statWind.textContent = "--";
       }
 
-      // OBSŁUGA WYŚWIETLANIA NOTATEK
       if (sess.diary && sess.diary.trim() !== "") {
         statNotes.textContent = sess.diary;
         statNotesContainer.style.display = "flex";
@@ -1092,6 +1136,10 @@
     // INIT
     // -------------------------------------------------------
     function init() {
+      // POPRAWKA NR 6: Upewniamy się, że przycisk wita nas stanem ładowania (choć robi to już HTML)
+      btnStart.classList.add("loading");
+      btnStart.setAttribute("disabled", "true");
+      
       fishingTotalSeconds = FISHING_DEFAULT_HOURS * 3600;
       intervalTotalSeconds = INTERVAL_DEFAULT_MIN * 60;
 
