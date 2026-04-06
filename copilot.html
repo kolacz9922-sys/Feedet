@@ -126,7 +126,8 @@
 .btn-main {
   flex: 1;
   width: 100%;
-  padding: 18px;
+  height: 90px; /* <<< NOWE — duże, wysokie przyciski */
+  padding: 0;   /* <<< padding niepotrzebny przy height */
   border-radius: var(--radius);
   border: 1px solid var(--border);
   background: rgba(15,23,42,0.9);
@@ -134,9 +135,11 @@
   justify-content: center;
   align-items: center;
   gap: 12px;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
   cursor: pointer;
+
+
 }
 
     }
