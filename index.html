@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#0f172a">
     <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Feeder%20Trener%22%2C%22short_name%22%3A%22Feeder%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230f172a%22%7D">
     
-    <title>Feeder Trener PRO - Głosowy Asystent</title>
+    <title>Feeder Trener PRO - Głosowy Asystent v2</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
@@ -55,7 +55,6 @@
             margin-left: 15px; cursor: pointer; transition: color 0.2s; padding: 0;
             display: flex; align-items: center; gap: 4px;
         }
-        .fs-btn:active { color: white; transform: scale(0.9); }
 
         .header { 
             display: flex; justify-content: space-between; align-items: center; 
@@ -69,7 +68,6 @@
         #sessionTimer { color: #e2e8f0; }
         #intervalTimer { color: #10b981; }
         .settings-icon { background: none; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; transition: color 0.2s; padding: 0;}
-        .settings-icon:active { color: white; transform: rotate(45deg); }
 
         .main-content { flex-grow: 1; display: flex; flex-direction: column; padding: 0 15px 10px 15px; gap: 10px; }
         .action-btn { 
@@ -93,13 +91,7 @@
             flex: 1; padding: 12px 2px; font-size: 10px; font-weight: 800; border: none; border-radius: 12px; 
             cursor: pointer; text-transform: uppercase; color: white; letter-spacing: 0.5px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: transform 0.1s;
-            -webkit-tap-highlight-color: transparent;
         }
-        .menu-btn:active { transform: scale(0.95); }
-        .btn-start { background: var(--grad-blue); }
-        .btn-chart { background: var(--grad-purple); }
-        .btn-history { background: var(--grad-yellow); color: #78350f; }
-        .btn-save { background: var(--grad-dark); border: 1px solid var(--glass-border); }
 
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); z-index: 100; justify-content: center; align-items: center; flex-direction: column; animation: fadeIn 0.2s ease-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -109,40 +101,13 @@
         
         .input-group { margin-bottom: 15px; }
         .input-group label { display: block; font-size: 11px; margin-bottom: 6px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;}
-        .input-group input, .input-group textarea { width: 100%; padding: 12px; background: rgba(0,0,0,0.2); border: 1px solid #334155; color: white; border-radius: 12px; box-sizing: border-box; font-family: inherit; font-size: 14px; transition: border-color 0.2s; }
-        .input-group input:focus, .input-group textarea:focus { outline: none; border-color: #3b82f6; background: rgba(0,0,0,0.4); }
-        
-        .history-item { background: rgba(255,255,255,0.03); padding: 12px; margin-bottom: 10px; border-radius: 12px; border: 1px solid var(--glass-border); border-left: 4px solid #3b82f6; transition: background 0.2s; }
-        .history-item:hover { background: rgba(255,255,255,0.06); }
-        .history-meta { font-size: 11px; color: var(--text-muted); margin-top: 6px; display: flex; gap: 8px;}
-        .history-notes { font-size: 12px; color: #cbd5e1; margin-top: 8px; font-style: italic; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 8px; }
-        .btn-delete-item { color: #ef4444; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border: none; font-size: 14px; cursor: pointer; padding: 8px; transition: background 0.2s; }
+        .input-group input, .input-group textarea { width: 100%; padding: 12px; background: rgba(0,0,0,0.2); border: 1px solid #334155; color: white; border-radius: 12px; box-sizing: border-box; font-family: inherit; font-size: 14px; }
         
         #exportArea { background: #1e293b; padding: 15px; border-radius: 16px; }
         .charts-wrapper { width: 100%; display: flex; flex-direction: column; gap: 10px; }
         .chart-box { background: rgba(0,0,0,0.2); padding: 5px; border-radius: 12px; height: 160px; position: relative; border: 1px solid var(--glass-border); }
-        
         .summary-box { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; margin-top: 15px; font-size: 12px; border: 1px solid var(--glass-border);}
-        .summary-box strong { color: #60a5fa; font-weight: 800; font-size: 14px;}
-        .summary-stats { display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid #334155; padding-bottom: 10px; }
-        .summary-weather { display: flex; flex-direction: column; gap: 4px; color: #94a3b8; font-size: 11px; }
-        .summary-notes-display { margin-top: 10px; padding-top: 10px; border-top: 1px dashed #475569; color: #cbd5e1; font-style: italic; display: none; line-height: 1.4; }
-           /* --- BLOKADA REKLAM DARMOWEGO HOSTINGU --- */
-        iframe, 
-        a[href*="tiiny"], 
-        div[id*="tiiny"], 
-        div[class*="tiiny"], 
-        div[style*="z-index: 9999"],
-        div[style*="z-index:9999"] {
-            display: none !important;
-            opacity: 0 !important;
-            visibility: hidden !important;
-            pointer-events: none !important;
-            height: 0 !important;
-            width: 0 !important;
-        }
-        
- </style>
+    </style>
 </head>
 <body>
 
@@ -151,7 +116,7 @@
         <div style="display:flex; align-items:center;">
             <button id="voiceBtn" class="fs-btn" onclick="toggleVoiceControl()">🎙️ Głos Wył.</button>
             <span class="real-clock" style="margin-left:15px;" id="realClock">00:00:00</span>
-            <button class="fs-btn" onclick="toggleFullScreen()" title="Pełny Ekran" style="font-size:18px;">🔲</button>
+            <button class="fs-btn" onclick="toggleFullScreen()" style="font-size:18px;">🔲</button>
         </div>
     </div>
 
@@ -174,75 +139,49 @@
     </div>
 
     <div class="footer">
-        <button class="menu-btn btn-start" id="startBtn" onclick="toggleSession()">▶ Start</button>
-        <button class="menu-btn btn-chart" onclick="showCurrentChart()">📊 Wykres</button>
-        <button class="menu-btn btn-history" onclick="openHistory()">📁 Historia</button>
-        <button class="menu-btn btn-save" onclick="openSaveModal()">💾 Zapisz</button>
+        <button class="menu-btn btn-start" id="startBtn" onclick="toggleSession()" style="background:var(--grad-blue); color:white;">▶ Start</button>
+        <button class="menu-btn btn-chart" onclick="showCurrentChart()" style="background:var(--grad-purple); color:white;">📊 Wykres</button>
+        <button class="menu-btn btn-history" onclick="openHistory()" style="background:var(--grad-yellow); color:#78350f;">📁 Historia</button>
+        <button class="menu-btn btn-save" onclick="openSaveModal()" style="background:var(--grad-dark); color:white; border:1px solid var(--glass-border);">💾 Zapisz</button>
     </div>
 
     <div id="saveModal" class="modal">
         <div class="modal-content">
             <h2>Zapisz Sesję</h2>
-            <div class="input-group">
-                <label>Nazwa Łowiska / Zawodów:</label>
-                <input type="text" id="saveName" placeholder="Np. Podgórki Tynieckie Tura 1">
-            </div>
-            <div class="input-group">
-                <label>Dziennik (zanęta, przynęty, wnioski):</label>
-                <textarea id="saveNotes" rows="4" placeholder="Np. Zanęta z dużą ilością jokersa..."></textarea>
-            </div>
-            <div class="modal-actions" style="display:flex; gap:10px; margin-top:20px;">
-                <button onclick="closeSaveModal()" style="flex:1; padding:12px; background:#475569; color:white; border:none; border-radius:12px; font-weight:700; cursor:pointer;">Anuluj</button>
-                <button onclick="confirmSave()" style="flex:1; padding:12px; background:var(--grad-green); color:white; border:none; border-radius:12px; font-weight:700; cursor:pointer;">Zapisz</button>
-            </div>
+            <div class="input-group"><label>Łowisko:</label><input type="text" id="saveName"></div>
+            <div class="input-group"><label>Notatki:</label><textarea id="saveNotes" rows="4"></textarea></div>
+            <div style="display:flex; gap:10px;"><button onclick="closeSaveModal()" style="flex:1; padding:12px; border-radius:12px;">Anuluj</button><button onclick="confirmSave()" style="flex:1; padding:12px; background:var(--grad-green); color:white; border-radius:12px;">Zapisz</button></div>
         </div>
     </div>
 
     <div id="historyModal" class="modal">
         <div class="modal-content">
-            <h2>Archiwum Sesji</h2>
-            <div id="historyList"></div>
-            <button onclick="closeHistory()" style="width:100%; padding:12px; margin-top:15px; background:#475569; color:white; border:none; border-radius:12px; font-weight:700; cursor:pointer;">Zamknij</button>
+            <h2>Historia</h2><div id="historyList"></div><button onclick="closeHistory()" style="width:100%; padding:12px; margin-top:15px; border-radius:12px;">Zamknij</button>
         </div>
     </div>
 
     <div id="settingsModal" class="modal">
         <div class="modal-content">
-            <h2>Konfiguracja</h2>
-            <div class="input-group">
-                <label>Czas trwania tury (godziny):</label>
-                <input type="number" id="inputSessionDuration" value="4">
-            </div>
-            <div class="input-group">
-                <label>Czas rzutu / Interwał (minuty):</label>
-                <input type="number" id="inputInterval" value="3">
-            </div>
-            <button onclick="applySettings()" style="width:100%; padding:12px; margin-top:10px; background:var(--grad-blue); color:white; border:none; border-radius:12px; font-weight:700; cursor:pointer;">Zastosuj</button>
+            <h2>Ustawienia</h2>
+            <div class="input-group"><label>Tura (h):</label><input type="number" id="inputSessionDuration" value="4"></div>
+            <div class="input-group"><label>Interwał (min):</label><input type="number" id="inputInterval" value="3"></div>
+            <button onclick="applySettings()" style="width:100%; padding:12px; background:var(--grad-blue); color:white; border-radius:12px;">Zastosuj</button>
         </div>
     </div>
 
     <div id="chartModal" class="modal">
-        <div class="modal-content" style="width: 95%; max-width: 800px; padding: 0; background: transparent; border: none; box-shadow: none;">
+        <div class="modal-content" style="width: 95%; max-width: 800px; background:transparent; border:none;">
             <div id="exportArea">
-                <h3 style="color: white; margin-top: 0; margin-bottom: 10px; font-size: 18px;" id="chartModalTitle">Analiza Sesji</h3>
-                <div class="charts-wrapper">
-                    <div class="chart-box"><canvas id="sessionChart"></canvas></div>
-                    <div class="chart-box"><canvas id="pressureChart"></canvas></div>
-                </div>
+                <h3 id="chartModalTitle" style="color:white; margin:0 0 10px 0;">Analiza</h3>
+                <div class="charts-wrapper"><div class="chart-box"><canvas id="sessionChart"></canvas></div><div class="chart-box"><canvas id="pressureChart"></canvas></div></div>
                 <div class="summary-box">
-                    <div class="summary-stats">
-                        <span>🐟 Ryby: <strong id="sumRyby" style="color: #ef4444;">0</strong></span>
-                        <span>⚠️ Brania: <strong id="sumBrania" style="color: #f59e0b;">0</strong></span>
-                        <span>🔄 Rzuty: <strong id="sumRzuty" style="color: #10b981;">0</strong></span>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                        <span>🐟 <strong id="sumRyby">0</strong></span><span>⚠️ <strong id="sumBrania">0</strong></span><span>🔄 <strong id="sumRzuty">0</strong></span>
                     </div>
-                    <div class="summary-weather" id="sumWeather"></div>
-                    <div class="summary-notes-display" id="sumNotesDisplay"></div>
+                    <div id="sumWeather" style="font-size:11px; color:var(--text-muted);"></div>
                 </div>
             </div>
-            <div style="display:flex; gap:10px; margin-top:15px;">
-                <button onclick="closeChart()" style="flex:1; padding:12px; background:rgba(0,0,0,0.5); color:white; border:1px solid #475569; border-radius:12px; font-weight:700; cursor:pointer;">Zamknij</button>
-                <button onclick="exportToJPG()" style="flex:2; padding:12px; background:var(--grad-blue); color:white; border:none; border-radius:12px; font-weight:800; cursor:pointer;">📸 Pobierz (JPG)</button>
-            </div>
+            <div style="display:flex; gap:10px; margin-top:15px;"><button onclick="closeChart()" style="flex:1; padding:12px; background:rgba(0,0,0,0.5); color:white; border-radius:12px;">Zamknij</button><button onclick="exportToJPG()" style="flex:2; padding:12px; background:var(--grad-blue); color:white; border-radius:12px;">📸 Pobierz (JPG)</button></div>
         </div>
     </div>
 
@@ -252,7 +191,6 @@
         Chart.defaults.font.family = "'Inter', sans-serif";
         setInterval(() => { document.getElementById('realClock').innerText = new Date().toLocaleTimeString('pl-PL'); }, 1000);
 
-        // PEŁNY EKRAN
         function toggleFullScreen() {
             if (!document.fullscreenElement && !document.webkitFullscreenElement) {  
                 if (document.documentElement.requestFullscreen) { document.documentElement.requestFullscreen(); } 
@@ -263,7 +201,7 @@
             }
         }
 
-        // STEROWANIE GŁOSOWE (Web Speech API)
+        // --- STEROWANIE GŁOSOWE ---
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let recognition = null;
         let isListening = false;
@@ -271,105 +209,52 @@
         if (SpeechRecognition) {
             recognition = new SpeechRecognition();
             recognition.lang = 'pl-PL';
-            recognition.continuous = true; // Słuchaj cały czas
+            recognition.continuous = true;
             recognition.interimResults = false;
 
             recognition.onresult = function(event) {
-                // Pobiera ostatnie wypowiedziane słowo/frazę
+                if (!isListening) return;
                 const transcript = event.results[event.results.length - 1][0].transcript.trim().toLowerCase();
                 
-                // Analiza słów
-                if (transcript.includes("ryba") || transcript.includes("mam")) {
-                    logEvent('RYBA');
-                } else if (transcript.includes("branie") || transcript.includes("puste")) {
-                    logEvent('BRANIE');
-                } else if (transcript.includes("przerzuć") || transcript.includes("rzut") || transcript.includes("przerzut")) {
-                    logEvent('PRZERZUĆ');
+                if (transcript.includes("ryba") || transcript.includes("mam")) { handleVoiceAction('RYBA'); } 
+                else if (transcript.includes("branie") || transcript.includes("puste")) { handleVoiceAction('BRANIE'); } 
+                else if (transcript.includes("przerzuć") || transcript.includes("rzut") || transcript.includes("przerzut")) { handleVoiceAction('PRZERZUĆ'); }
+                else if (transcript.includes("czas na")) {
+                    const words = transcript.split(" ");
+                    const numbersMap = { "jeden":1, "dwa":2, "trzy":3, "cztery":4, "pięć":5, "sześć":6, "siedem":7, "osiem":8, "dziewięć":9, "dziesięć":10 };
+                    let val = null;
+                    words.forEach(w => {
+                        if (!isNaN(w)) val = parseInt(w);
+                        if (numbersMap[w]) val = numbersMap[w];
+                    });
+                    if (val) {
+                        configIntervalMinutes = val;
+                        intervalSeconds = configIntervalMinutes * 60;
+                        intervalTimerEl.innerText = formatTime(intervalSeconds);
+                        if ("vibrate" in navigator) navigator.vibrate([500]);
+                    }
                 }
             };
+            recognition.onend = function() { if (isListening) recognition.start(); };
+        }
 
-            // Zabezpieczenie przed samoczynnym wyłączaniem się mikrofonu
-            recognition.onend = function() {
-                if (isListening) { recognition.start(); }
-            };
-            
-            recognition.onerror = function(event) {
-                console.error("Błąd rozpoznawania głosu: ", event.error);
-                if (event.error === 'not-allowed') {
-                    isListening = false;
-                    updateVoiceUI();
-                    alert("Aplikacja nie ma uprawnień do mikrofonu.");
-                }
-            };
+        function handleVoiceAction(type) {
+            isListening = false;
+            recognition.stop();
+            logEvent(type, true);
+            setTimeout(() => { if (!isListening) { isListening = true; recognition.start(); } }, 1500);
         }
 
         function toggleVoiceControl() {
-            if (!recognition) {
-                alert("Twoja przeglądarka nie obsługuje sterowania głosowego. Użyj Google Chrome na Androidzie.");
-                return;
-            }
-
-            if (!isListening) {
-                try {
-                    recognition.start();
-                    isListening = true;
-                    updateVoiceUI();
-                } catch(e) {}
-            } else {
-                isListening = false;
-                recognition.stop();
-                updateVoiceUI();
-            }
-        }
-        
-        function updateVoiceUI() {
+            if (!recognition) return;
+            isListening = !isListening;
+            isListening ? recognition.start() : recognition.stop();
             const btn = document.getElementById("voiceBtn");
-            if(isListening) {
-                btn.style.color = "#ef4444"; 
-                btn.innerText = "🎙️ Słucha...";
-            } else {
-                btn.style.color = "#94a3b8"; 
-                btn.innerText = "🎙️ Głos Wył.";
-            }
+            btn.style.color = isListening ? "#ef4444" : "#94a3b8";
+            btn.innerText = isListening ? "🎙️ Słucha..." : "🎙️ Głos Wył.";
         }
 
-        // POGODA
-        let currentTemp = "--", currentPressure = "--", currentWind = "--", currentWindDir = "--";
-        let latKrakow = 50.0614, lonKrakow = 19.9366; 
-
-        function getWindDirectionPl(degree) {
-            if (degree === undefined || degree === null) return "Brak";
-            if (degree >= 337.5 || degree < 22.5) return 'Północny (N)';
-            if (degree >= 22.5 && degree < 67.5) return 'Północno-wschodni (NE)';
-            if (degree >= 67.5 && degree < 112.5) return 'Wschodni (E)';
-            if (degree >= 112.5 && degree < 157.5) return 'Południowo-wschodni (SE)';
-            if (degree >= 157.5 && degree < 202.5) return 'Południowy (S)';
-            if (degree >= 202.5 && degree < 247.5) return 'Południowo-zachodni (SW)';
-            if (degree >= 247.5 && degree < 292.5) return 'Zachodni (W)';
-            if (degree >= 292.5 && degree < 337.5) return 'Północno-zachodni (NW)';
-            return 'Zmienny';
-        }
-
-        async function fetchCurrentWeather(lat, lon) {
-            try {
-                const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,surface_pressure,wind_speed_10m,wind_direction_10m`;
-                const response = await fetch(url);
-                const data = await response.json();
-                currentTemp = data.current.temperature_2m;
-                currentPressure = data.current.surface_pressure;
-                currentWind = data.current.wind_speed_10m;
-                currentWindDir = getWindDirectionPl(data.current.wind_direction_10m);
-                document.getElementById('weatherDisplay').innerText = `⛅ ${currentTemp}°C | ${currentPressure} hPa | ${currentWind} km/h`;
-                return currentPressure;
-            } catch (e) { return null; }
-        }
-
-        navigator.geolocation.getCurrentPosition(
-            pos => fetchCurrentWeather(pos.coords.latitude, pos.coords.longitude),
-            err => fetchCurrentWeather(latKrakow, lonKrakow) 
-        );
-
-        // LOGIKA APLIKACJI
+        // --- LOGIKA ---
         let isSessionActive = false, sessionSecondsElapsed = 0, configSessionHours = 4, configIntervalMinutes = 3; 
         let intervalSeconds = configIntervalMinutes * 60, mainIntervalId = null, pressureIntervalId = null;
         let eventsLog = [], pressureLog = [], chart1 = null, chart2 = null;
@@ -377,12 +262,8 @@
         const sessionTimerEl = document.getElementById('sessionTimer'), intervalTimerEl = document.getElementById('intervalTimer');
         const startBtn = document.getElementById('startBtn'), actionBtns = [document.getElementById('btnP'), document.getElementById('btnB'), document.getElementById('btnR')];
 
-        // AUDIO SYSTEM
         let audioCtx;
-        function initAudio() {
-            if (!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
-            if (audioCtx.state === 'suspended') { audioCtx.resume(); }
-        }
+        function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume(); }
 
         function playBeep() {
             if (!audioCtx) return;
@@ -391,199 +272,118 @@
                 const startTime = audioCtx.currentTime + (i * (duration + gap));
                 const osc = audioCtx.createOscillator();
                 const gainNode = audioCtx.createGain();
-                osc.type = 'triangle'; 
-                osc.frequency.setValueAtTime(freq, startTime);
+                osc.type = 'triangle'; osc.frequency.setValueAtTime(freq, startTime);
                 gainNode.gain.setValueAtTime(0, startTime);
                 gainNode.gain.linearRampToValueAtTime(1, startTime + 0.02); 
-                gainNode.gain.setValueAtTime(1, startTime + duration - 0.05);
                 gainNode.gain.linearRampToValueAtTime(0, startTime + duration); 
-                osc.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
-                osc.start(startTime);
-                osc.stop(startTime + duration);
+                osc.connect(gainNode); gainNode.connect(audioCtx.destination);
+                osc.start(startTime); osc.stop(startTime + duration);
             }
-            if ("vibrate" in navigator) { navigator.vibrate([150, 100, 150, 100, 150]); }
+            if ("vibrate" in navigator) navigator.vibrate([150, 100, 150]);
         }
 
         function formatTime(totalSeconds, includeHours = false) {
-            if (totalSeconds < 0) totalSeconds = 0;
             const h = Math.floor(totalSeconds / 3600), m = Math.floor((totalSeconds % 3600) / 60), s = totalSeconds % 60;
             const pad = (num) => num.toString().padStart(2, '0');
             return includeHours ? `${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
         }
 
-        async function logPressure() {
-            const pressure = await fetchCurrentWeather(latKrakow, lonKrakow);
-            if (pressure) pressureLog.push({ timeSec: sessionSecondsElapsed, pressure: pressure });
+        let currentTemp = "--", currentPressure = "--", currentWind = "--", currentWindDir = "--";
+        async function fetchCurrentWeather() {
+            try {
+                const url = `https://api.open-meteo.com/v1/forecast?latitude=50.06&longitude=19.94&current=temperature_2m,surface_pressure,wind_speed_10m`;
+                const response = await fetch(url);
+                const data = await response.json();
+                currentTemp = data.current.temperature_2m;
+                currentPressure = data.current.surface_pressure;
+                currentWind = data.current.wind_speed_10m;
+                document.getElementById('weatherDisplay').innerText = `⛅ ${currentTemp}°C | ${currentPressure} hPa | ${currentWind} km/h`;
+                return currentPressure;
+            } catch (e) { return null; }
         }
+        fetchCurrentWeather();
 
         function tick() {
             sessionSecondsElapsed++;
             let timeLeft = (configSessionHours * 3600) - sessionSecondsElapsed;
             sessionTimerEl.innerText = formatTime(timeLeft, true);
-            
             if (intervalSeconds > 0) {
                 intervalSeconds--;
                 intervalTimerEl.innerText = formatTime(intervalSeconds);
-                if (intervalSeconds === 0) { 
-                    intervalTimerEl.style.color = "#ef4444"; 
-                    playBeep(); 
-                }
+                if (intervalSeconds === 0) { intervalTimerEl.style.color = "#ef4444"; playBeep(); }
             }
         }
 
         function toggleSession() {
             initAudio(); 
-            if (!isSessionActive) {
-                isSessionActive = true;
+            isSessionActive = !isSessionActive;
+            if (isSessionActive) {
                 startBtn.innerHTML = "⏸ Pauza";
-                startBtn.style.background = "var(--grad-dark)";
                 actionBtns.forEach(btn => btn.disabled = false);
                 mainIntervalId = setInterval(tick, 1000);
-                logPressure();
-                pressureIntervalId = setInterval(logPressure, 900000); 
+                pressureIntervalId = setInterval(() => { fetchCurrentWeather().then(p => { if(p) pressureLog.push({timeSec: sessionSecondsElapsed, pressure: p})}) }, 900000);
             } else {
-                isSessionActive = false;
                 startBtn.innerHTML = "▶ Start";
-                startBtn.style.background = "var(--grad-blue)";
                 clearInterval(mainIntervalId);
                 clearInterval(pressureIntervalId);
             }
         }
 
-        // TUTAJ WIDZI KLIKNIĘCIE I GŁOS
-        function logEvent(actionType) {
-            if(!isSessionActive) return; // Zapobiega dodawaniu ryb jak jest pauza
+        function logEvent(actionType, isFromVoice = false) {
+            if(!isSessionActive) return;
             initAudio();
             eventsLog.push({ timeSec: sessionSecondsElapsed, action: actionType, realTime: new Date().toLocaleTimeString('pl-PL') });
             intervalSeconds = configIntervalMinutes * 60;
             intervalTimerEl.innerText = formatTime(intervalSeconds);
             intervalTimerEl.style.color = "#10b981";
-            
-            // Reakcja dźwiękowa i wibracyjna na kliknięcie/komendę
-            playBeep(); 
+            if (!isFromVoice) playBeep(); else if ("vibrate" in navigator) navigator.vibrate([200]);
         }
 
         function openSettings() { document.getElementById('settingsModal').style.display = 'flex'; }
-        
         function applySettings() {
             configSessionHours = parseInt(document.getElementById('inputSessionDuration').value);
             configIntervalMinutes = parseInt(document.getElementById('inputInterval').value);
             intervalSeconds = configIntervalMinutes * 60;
             intervalTimerEl.innerText = formatTime(intervalSeconds);
-            intervalTimerEl.style.color = "#10b981"; 
-            if (!isSessionActive) {
-                let timeLeft = configSessionHours * 3600;
-                sessionTimerEl.innerText = formatTime(timeLeft, true);
-                sessionTimerEl.style.color = "#e2e8f0";
-            }
+            if (!isSessionActive) sessionTimerEl.innerText = formatTime(configSessionHours * 3600, true);
             document.getElementById('settingsModal').style.display = 'none';
         }
-
-        function openSaveModal() { document.getElementById('saveModal').style.display = 'flex'; document.getElementById('saveName').value = "Sesja - " + new Date().toLocaleDateString(); }
+        function openSaveModal() { document.getElementById('saveModal').style.display = 'flex'; }
         function closeSaveModal() { document.getElementById('saveModal').style.display = 'none'; }
-        
         function confirmSave() {
-            const name = document.getElementById('saveName').value, notes = document.getElementById('saveNotes').value;
             const sessions = JSON.parse(localStorage.getItem('feeder_sessions_v7')) || [];
-            sessions.push({
-                id: Date.now(), name: name, notes: notes, weatherObj: { temp: currentTemp, wind: currentWind, dir: currentWindDir, pressure: currentPressure },
-                date: new Date().toLocaleString(), events: eventsLog, pressures: pressureLog 
-            });
+            sessions.push({ id: Date.now(), name: document.getElementById('saveName').value, notes: document.getElementById('saveNotes').value, date: new Date().toLocaleString(), events: eventsLog, pressures: pressureLog, weather: {t:currentTemp, p:currentPressure} });
             localStorage.setItem('feeder_sessions_v7', JSON.stringify(sessions));
-            alert("Sesja zapisana! Możesz ją znaleźć w Historii.");
             location.reload();
         }
-
         function openHistory() {
             const list = document.getElementById('historyList'); list.innerHTML = '';
             const sessions = JSON.parse(localStorage.getItem('feeder_sessions_v7')) || [];
             sessions.slice().reverse().forEach(s => {
                 const item = document.createElement('div'); item.className = 'history-item';
-                const w = s.weatherObj || { temp: '?', wind: '?', dir: '?', pressure: '?' };
-                item.innerHTML = `
-                    <div style="display:flex; justify-content:space-between; align-items:start;">
-                        <div onclick="showSessionChart('${s.id}')" style="flex-grow:1; cursor:pointer;">
-                            <strong style="color:#60a5fa; font-size:14px;">${s.name}</strong>
-                            <div class="history-meta"><span>📅 ${s.date}</span> <span>🌡️ ${w.temp}°C</span></div>
-                            ${s.notes ? `<div class="history-notes">📝 ${s.notes}</div>` : ''}
-                        </div>
-                        <button class="btn-delete-item" onclick="deleteSession('${s.id}')">🗑️</button>
-                    </div>`;
+                item.innerHTML = `<div onclick="showSessionChart('${s.id}')"><strong>${s.name}</strong> - ${s.date}</div>`;
                 list.appendChild(item);
             });
             document.getElementById('historyModal').style.display = 'flex';
         }
-
-        function deleteSession(id) {
-            if(confirm("Usunąć sesję z archiwum?")) {
-                let sessions = JSON.parse(localStorage.getItem('feeder_sessions_v7'));
-                sessions = sessions.filter(s => s.id != id);
-                localStorage.setItem('feeder_sessions_v7', JSON.stringify(sessions));
-                openHistory();
-            }
-        }
-
         function showSessionChart(id) {
-            const sessions = JSON.parse(localStorage.getItem('feeder_sessions_v7'));
-            const s = sessions.find(x => x.id == id);
+            const s = JSON.parse(localStorage.getItem('feeder_sessions_v7')).find(x => x.id == id);
             document.getElementById('historyModal').style.display = 'none';
-            renderDualCharts(s.events, s.pressures || [], s.name, s.weatherObj || { temp: '-', wind: '-', dir: '-', pressure: '-' }, s.notes);
+            renderDualCharts(s.events, s.pressures || [], s.name, s.weather, s.notes);
         }
-
-        function showCurrentChart() {
-            if(eventsLog.length === 0 && pressureLog.length === 0) { alert("Brak danych."); return; }
-            renderDualCharts(eventsLog, pressureLog, "Bieżąca Sesja (Na Żywo)", { temp: currentTemp, wind: currentWind, dir: currentWindDir, pressure: currentPressure }, "Sesja w trakcie.");
-        }
-
+        function showCurrentChart() { renderDualCharts(eventsLog, pressureLog, "Na Żywo", {t:currentTemp, p:currentPressure}, ""); }
         function renderDualCharts(eventsData, pressureData, titleText, weatherData, notesText) {
             document.getElementById('chartModalTitle').innerText = titleText;
             document.getElementById('sumRyby').innerText = eventsData.filter(d => d.action === 'RYBA').length;
             document.getElementById('sumBrania').innerText = eventsData.filter(d => d.action === 'BRANIE').length;
             document.getElementById('sumRzuty').innerText = eventsData.filter(d => d.action === 'PRZERZUĆ').length;
-            document.getElementById('sumWeather').innerHTML = `<span>🌡️ Temp: <strong style="color:white;">${weatherData.temp}°C</strong> | ⏱️ Ciśn: <strong style="color:white;">${weatherData.pressure} hPa</strong></span><span>💨 Wiatr: <strong style="color:white;">${weatherData.wind} km/h</strong> (${weatherData.dir})</span>`;
-
-            const notesEl = document.getElementById('sumNotesDisplay');
-            if (notesText && notesText.trim() !== "") { notesEl.style.display = "block"; notesEl.innerHTML = `<strong>Dziennik Wędkarski:</strong><br><span style="color:#f8fafc;">${notesText.replace(/\n/g, '<br>')}</span>`; } 
-            else { notesEl.style.display = "none"; }
-
             document.getElementById('chartModal').style.display = 'flex';
-            let maxTimeSec = 0;
-            if (eventsData.length > 0) maxTimeSec = Math.max(maxTimeSec, eventsData[eventsData.length-1].timeSec);
-            if (pressureData.length > 0) maxTimeSec = Math.max(maxTimeSec, pressureData[pressureData.length-1].timeSec);
-            let maxX = Math.max(60, Math.ceil(maxTimeSec / 60) + 10); 
-
             if (chart1) chart1.destroy(); if (chart2) chart2.destroy();
-
-            const ctx1 = document.getElementById('sessionChart').getContext('2d');
-            chart1 = new Chart(ctx1, {
-                type: 'scatter',
-                data: {
-                    datasets: [
-                        { label: 'Przerzut', data: eventsData.filter(d => d.action === 'PRZERZUĆ').map(d => ({ x: d.timeSec / 60, y: 1, rt: d.realTime })), backgroundColor: '#10b981', pointRadius: 4 },
-                        { label: 'Branie', data: eventsData.filter(d => d.action === 'BRANIE').map(d => ({ x: d.timeSec / 60, y: 2, rt: d.realTime })), backgroundColor: '#f59e0b', pointRadius: 5 },
-                        { label: 'Ryba', data: eventsData.filter(d => d.action === 'RYBA').map(d => ({ x: d.timeSec / 60, y: 3, rt: d.realTime })), backgroundColor: '#ef4444', pointRadius: 6 }
-                    ]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => `${c.dataset.label}: ${c.raw.rt || ''}` } } }, scales: { x: { display: false, min: 0, max: maxX }, y: { min: 0, max: 4, ticks: { stepSize: 1, callback: v => ['','Rzut','Branie','Ryba',''][v] } } } }
-            });
-
-            const ctx2 = document.getElementById('pressureChart').getContext('2d');
-            chart2 = new Chart(ctx2, {
-                type: 'line',
-                data: { datasets: [{ label: 'Ciśnienie', data: pressureData.map(d => ({ x: d.timeSec / 60, y: d.pressure })), borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.15)', borderWidth: 3, fill: true, tension: 0.4 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { title: { display: true, text: 'Czas trwania (minuty)' }, min: 0, max: maxX }, y: { title: { display: true, text: 'hPa' } } } }
-            });
+            const maxX = Math.max(60, Math.ceil(sessionSecondsElapsed / 60) + 5);
+            chart1 = new Chart(document.getElementById('sessionChart'), { type: 'scatter', data: { datasets: [ { label: 'Rzut', data: eventsData.filter(d => d.action === 'PRZERZUĆ').map(d => ({ x: d.timeSec / 60, y: 1 })), backgroundColor: '#10b981' }, { label: 'Branie', data: eventsData.filter(d => d.action === 'BRANIE').map(d => ({ x: d.timeSec / 60, y: 2 })), backgroundColor: '#f59e0b' }, { label: 'Ryba', data: eventsData.filter(d => d.action === 'RYBA').map(d => ({ x: d.timeSec / 60, y: 3 })), backgroundColor: '#ef4444' } ] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { min: 0, max: maxX }, y: { min: 0, max: 4 } } } });
+            chart2 = new Chart(document.getElementById('pressureChart'), { type: 'line', data: { datasets: [{ label: 'hPa', data: pressureData.map(d => ({ x: d.timeSec / 60, y: d.pressure })), borderColor: '#3b82f6', fill: true }] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { min: 0, max: maxX } } } });
         }
-
-        function exportToJPG() {
-            const target = document.getElementById('exportArea'); target.style.background = "#1e293b"; 
-            html2canvas(target, { scale: 2 }).then(canvas => {
-                const link = document.createElement('a'); link.download = `Raport_Feeder_${new Date().toISOString().slice(0,10)}.jpg`;
-                link.href = canvas.toDataURL('image/jpeg', 0.9); link.click();
-            });
-        }
-
+        function exportToJPG() { html2canvas(document.getElementById('exportArea'), { scale: 2 }).then(canvas => { const link = document.createElement('a'); link.download = `Raport.jpg`; link.href = canvas.toDataURL('image/jpeg', 0.9); link.click(); }); }
         function closeHistory() { document.getElementById('historyModal').style.display = 'none'; }
         function closeChart() { document.getElementById('chartModal').style.display = 'none'; }
     </script>
