@@ -1067,22 +1067,25 @@
     // INIT
     // -------------------------------------------------------
     function init() {
-      fishingTotalSeconds = FISHING_DEFAULT_HOURS * 3600;
-      intervalTotalSeconds = INTERVAL_DEFAULT_MIN * 60;
+  localStorage.removeItem("feeder_trener_pro_sessions"); // <<< DODANE
 
-      fishingRemaining = fishingTotalSeconds;
-      intervalRemaining = intervalTotalSeconds;
-      elapsedSeconds = 0;
+  fishingTotalSeconds = FISHING_DEFAULT_HOURS * 3600;
+  intervalTotalSeconds = INTERVAL_DEFAULT_MIN * 60;
 
-      events = [];
-      pressureSamples = [];
-      intervalExpiredNotified = false;
+  fishingRemaining = fishingTotalSeconds;
+  intervalRemaining = intervalTotalSeconds;
+  elapsedSeconds = 0;
 
-      updateTimers();
-      enableMainButtons(false);
-      initClock();
-      initWeather();
-    }
+  events = [];
+  pressureSamples = [];
+  intervalExpiredNotified = false;
+
+  updateTimers();
+  enableMainButtons(false);
+  initClock();
+  initWeather();
+}
+
 
     document.addEventListener("DOMContentLoaded", init);
   </script>
