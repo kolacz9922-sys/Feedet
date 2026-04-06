@@ -6,9 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0f172a" />
 
-  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <!-- html2canvas -->
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
   <style>
@@ -40,13 +38,14 @@
       display: flex;
       justify-content: center;
       min-height: 100vh;
+      min-height: 100dvh;
       padding-bottom: 80px;
     }
     .app {
       min-height: calc(100vh - 80px);
       display: flex;
       flex-direction: column;
-      
+      width: 100%;
     }
     .glass {
       background: var(--glass);
@@ -112,38 +111,36 @@
     .timer-interval.expired .timer-value { color: var(--red); }
 
     /* -------------------------------------------------------
-       MAIN BUTTONS (ROZCIĄGNIĘTE)
+       MAIN BUTTONS
     ------------------------------------------------------- */
     .actions {
       flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 12px;
-  
-}
-
-.btn-main {
-  flex: 1;
-  width: 100%;
-  height: 100px; /* <<< DUŻE, WYSOKIE PRZYCISKI */
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  background: rgba(15,23,42,0.9);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  
-  font-size: 26px;
-  font-weight: 700;
-  cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 16px;
     }
 
-    
+    .btn-main {
+      flex: 1;
+      width: 100%;
+      min-height: 80px; 
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: rgba(15,23,42,0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 26px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
     .btn-main.disabled { opacity: 0.35; pointer-events: none; }
-    .btn-main.green { border-color: rgba(34,197,94,0.6); }
-    .btn-main.yellow { border-color: rgba(234,179,8,0.6); }
-    .btn-main.red { border-color: rgba(239,68,68,0.6); }
+    .btn-main.green { border-color: rgba(34,197,94,0.6); color: #22c55e; }
+    .btn-main.yellow { border-color: rgba(234,179,8,0.6); color: #eab308; }
+    .btn-main.red { border-color: rgba(239,68,68,0.6); color: #ef4444; }
 
     /* -------------------------------------------------------
        BOTTOM NAV
@@ -170,20 +167,23 @@
     }
     .btn-nav {
       flex: 1;
-      padding: 6px 4px;
+      padding: 10px 4px;
       border-radius: 999px;
       background: rgba(15,23,42,0.9);
       border: 1px solid var(--border);
-      font-size: 11px;
+      font-size: 12px;
+      font-weight: 600;
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
       gap: 2px;
       cursor: pointer;
     }
     .btn-nav.primary {
       background: rgba(56,189,248,0.25);
       border-color: rgba(56,189,248,0.8);
+      color: #fff;
     }
 
     /* -------------------------------------------------------
@@ -201,7 +201,7 @@
     }
     .modal-backdrop.active { display: flex; }
     .modal {
-      width: 100%;
+      width: 90%;
       max-width: 480px;
       background: rgba(15,23,42,0.96);
       border-radius: 20px;
@@ -234,18 +234,19 @@
       background: rgba(15,23,42,0.95);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 8px 10px;
+      padding: 10px;
       color: var(--text);
       font-size: 14px;
     }
     .form-textarea { min-height: 80px; resize: vertical; }
 
     .btn-primary {
-      padding: 10px;
+      padding: 12px;
       border-radius: 12px;
       background: rgba(56,189,248,0.25);
       border: 1px solid rgba(56,189,248,0.8);
       font-weight: 600;
+      color: white;
       cursor: pointer;
     }
 
@@ -286,7 +287,6 @@
 <body>
   <div class="app">
 
-    <!-- TOP BAR -->
     <div class="glass topbar">
       <div>
         <div class="weather-main" id="weatherMain">Pogoda: --°C</div>
@@ -299,7 +299,6 @@
       </div>
     </div>
 
-    <!-- TIMERS -->
     <div class="glass timers">
       <div class="timer-row timer-main">
         <div><div class="timer-label">Czas łowienia</div></div>
@@ -311,7 +310,6 @@
       </div>
     </div>
 
-    <!-- ACTION BUTTONS (ROZCIĄGNIĘTE) -->
     <div class="actions">
       <div class="btn-main green disabled" id="btnRzut">🔄 Rzut</div>
       <div class="btn-main yellow disabled" id="btnBranie">⚠️ Branie</div>
@@ -320,27 +318,20 @@
 
   </div>
 
-  <!-- BOTTOM NAV -->
   <div class="nav">
-    <div class="nav-inner class">
-      <div class="btn-nav primary btn-start loading" id="btnStart" disabled>
-  <span class="loader"></span>
-  <span class="loader-text">Ładowanie pogody…</span>
-  <span class="start-text">▶ Start</span>
-</div>
-
+    <div class="nav-inner">
+      <div class="btn-nav primary" id="btnStart">▶ Start</div>
       <div class="btn-nav" id="btnCharts">📊 Wykres</div>
       <div class="btn-nav" id="btnHistory">📁 Historia</div>
       <div class="btn-nav" id="btnSave">💾 Zapisz</div>
     </div>
   </div>
 
-  <!-- MODALS (Settings, Save, History, Charts) -->
   <div class="modal-backdrop" id="modalSettings">
     <div class="modal">
       <div class="modal-header">
         <span>⚙️ Ustawienia</span>
-        <span class="modal-close" data-close="modalSettings">✕</span>
+        <span class="modal-close" data-close="modalSettings" style="cursor:pointer">✕</span>
       </div>
       <div class="modal-body">
         <div class="form-group">
@@ -360,7 +351,7 @@
     <div class="modal">
       <div class="modal-header">
         <span>💾 Zapisz sesję</span>
-        <span class="modal-close" data-close="modalSave">✕</span>
+        <span class="modal-close" data-close="modalSave" style="cursor:pointer">✕</span>
       </div>
       <div class="modal-body">
         <div class="form-group">
@@ -380,7 +371,7 @@
     <div class="modal">
       <div class="modal-header">
         <span>📁 Historia</span>
-        <span class="modal-close" data-close="modalHistory">✕</span>
+        <span class="modal-close" data-close="modalHistory" style="cursor:pointer">✕</span>
       </div>
       <div class="modal-body">
         <div id="historyList"></div>
@@ -392,7 +383,7 @@
     <div class="modal">
       <div class="modal-header">
         <span>📊 Wykresy</span>
-        <span class="modal-close" data-close="modalCharts">✕</span>
+        <span class="modal-close" data-close="modalCharts" style="cursor:pointer">✕</span>
       </div>
       <div class="modal-body">
         <div id="chartsExportArea">
@@ -419,10 +410,11 @@
             </div>
           </div>
         </div>
-        <button class="btn-primary" id="btnExport">📷 Eksport JPG</button>
+        <button class="btn-primary" id="btnExport" style="margin-top:12px; width:100%">📷 Eksport JPG</button>
       </div>
     </div>
   </div>
+
   <script>
     // -------------------------------------------------------
     // CONFIG & STATE
@@ -588,12 +580,6 @@
             `Ciśnienie: ${press.toFixed(0)} hPa · Wiatr: ${windKmh.toFixed(1)} km/h ${dir}`;
 
           lastWeather = { temp, press, wind: windKmh, dir };
-          // --- PATCH: pogoda pobrana, odblokuj START ---
-weatherReady = true;
-btnStart.classList.remove("loading");
-btnStart.classList.add("ready");
-btnStart.removeAttribute("disabled");
-
         })
         .catch(() => {});
     }
@@ -610,99 +596,97 @@ btnStart.removeAttribute("disabled");
       }
     }
 
-   // -------------------------------------------------------
-// TIMERS
-// -------------------------------------------------------
-function updateTimers() {
-  elTimerFishing.textContent = formatHMS(fishingRemaining);
-  elTimerInterval.textContent = formatMS(intervalRemaining);
-}
+    // -------------------------------------------------------
+    // TIMERS
+    // -------------------------------------------------------
+    function updateTimers() {
+      elTimerFishing.textContent = formatHMS(fishingRemaining);
+      elTimerInterval.textContent = formatMS(intervalRemaining);
+    }
 
-function resetIntervalVisual() {
-  elIntervalLine.classList.remove("expired");
-  elTimerInterval.textContent = formatMS(intervalRemaining);
-}
+    function resetIntervalVisual() {
+      elIntervalLine.classList.remove("expired");
+      elTimerInterval.textContent = formatMS(intervalRemaining);
+    }
 
-function startTimers() {
-  if (timersRunning) return;
-  timersRunning = true;
-  btnStart.textContent = "⏸ Pauza";
-  enableMainButtons(true);
+    function startTimers() {
+      if (timersRunning) return;
+      timersRunning = true;
+      btnStart.textContent = "⏸ Pauza";
+      enableMainButtons(true);
 
-  // 🔥 Pierwsza próbka ciśnienia natychmiast po starcie
-  if (lastWeather && typeof lastWeather.press === "number") {
-    pressureSamples.push({
-      t: 0,
-      p: lastWeather.press
-    });
-  }
-
-  // GŁÓWNY TIMER
-  if (!tickId) {
-    tickId = setInterval(() => {
-      if (!timersRunning) return;
-
-      elapsedSeconds++;
-      fishingRemaining = Math.max(0, fishingRemaining - 1);
-      intervalRemaining = Math.max(0, intervalRemaining - 1);
-
-      if (intervalRemaining === 0) {
-        elIntervalLine.classList.add("expired");
-        if (!intervalExpiredNotified) {
-          beep(200, 520, 0.25);
-          vibrate([80, 60, 80]);
-          intervalExpiredNotified = true;
-        }
-      }
-
-      updateTimers();
-    }, 1000);
-  }
-
-  // TIMER CIŚNIENIA
-  if (!pressureId) {
-    pressureId = setInterval(() => {
-      if (timersRunning && lastWeather && typeof lastWeather.press === "number") {
+      // Pierwsza próbka ciśnienia natychmiast po starcie
+      if (lastWeather && typeof lastWeather.press === "number") {
         pressureSamples.push({
-          t: Math.max(0, minutesFromStart()),
+          t: 0,
           p: lastWeather.press
         });
       }
-      initWeather();
-    }, 15 * 60 * 1000);
-  }
-}
 
-function pauseTimers() {
-  timersRunning = false;
-  btnStart.textContent = "▶ Start";
-  enableMainButtons(false);
-}
+      // GŁÓWNY TIMER
+      if (!tickId) {
+        tickId = setInterval(() => {
+          if (!timersRunning) return;
 
-function toggleStart() {
-  if (timersRunning) pauseTimers();
-  else startTimers();
-}
+          elapsedSeconds++;
+          fishingRemaining = Math.max(0, fishingRemaining - 1);
+          intervalRemaining = Math.max(0, intervalRemaining - 1);
+
+          if (intervalRemaining === 0) {
+            elIntervalLine.classList.add("expired");
+            if (!intervalExpiredNotified) {
+              beep(200, 520, 0.25);
+              vibrate([80, 60, 80]);
+              intervalExpiredNotified = true;
+            }
+          }
+
+          updateTimers();
+        }, 1000);
+      }
+
+      // TIMER CIŚNIENIA
+      if (!pressureId) {
+        pressureId = setInterval(() => {
+          if (timersRunning && lastWeather && typeof lastWeather.press === "number") {
+            pressureSamples.push({
+              t: Math.max(0, minutesFromStart()),
+              p: lastWeather.press
+            });
+          }
+          initWeather();
+        }, 15 * 60 * 1000);
+      }
+    }
+
+    function pauseTimers() {
+      timersRunning = false;
+      btnStart.textContent = "▶ Start";
+      enableMainButtons(false);
+    }
+
+    function toggleStart() {
+      if (timersRunning) pauseTimers();
+      else startTimers();
+    }
 
     // -------------------------------------------------------
     // EVENTS (RZUT / BRANIE / RYBA)
     // -------------------------------------------------------
     function addEvent(type) {
-  if (!timersRunning) return;
+      if (!timersRunning) return;
 
-  // 🔥 ZABEZPIECZENIE PRZED UJEMNYM CZASEM
-  const t = Math.max(0, minutesFromStart());
+      const t = Math.max(0, minutesFromStart());
+      events.push({ t, type });
 
-  events.push({ t, type });
+      const freq = type === "ryba" ? 660 : type === "branie" ? 560 : 480;
+      beep(120, freq, 0.25);
+      vibrate(60);
 
-  const freq = type === "ryba" ? 660 : type === "branie" ? 560 : 480;
-  beep(120, freq, 0.25);
-  vibrate(60);
-
-  intervalRemaining = intervalTotalSeconds;
-  intervalExpiredNotified = false;
-  resetIntervalVisual();
-}
+      intervalRemaining = intervalTotalSeconds;
+      intervalExpiredNotified = false;
+      resetIntervalVisual();
+    }
 
 
     // -------------------------------------------------------
@@ -859,6 +843,7 @@ function toggleStart() {
       if (chartEvents) chartEvents.destroy();
       if (chartPressure) chartPressure.destroy();
 
+      // WYKRES ZDARZEŃ (NAPRAWIONE MIN: 0)
       chartEvents = new Chart(chartEventsCtx, {
         type: "scatter",
         data: {
@@ -887,6 +872,7 @@ function toggleStart() {
           scales: {
             x: {
               type: "linear",
+              min: 0, // ZABEZPIECZENIE PRZED UJEMNĄ OSIĄ
               title: { display: true, text: "Czas (minuty)", color: "#9ca3af" },
               ticks: { color: "#9ca3af" },
               grid: { color: "rgba(55,65,81,0.6)" }
@@ -906,6 +892,7 @@ function toggleStart() {
         }
       });
 
+      // WYKRES CIŚNIENIA (NAPRAWIONE MIN: 0)
       chartPressure = new Chart(chartPressureCtx, {
         type: "line",
         data: {
@@ -936,6 +923,7 @@ function toggleStart() {
           scales: {
             x: {
               type: "linear",
+              min: 0, // ZABEZPIECZENIE PRZED UJEMNĄ OSIĄ
               title: { display: true, text: "Czas (minuty)", color: "#9ca3af" },
               ticks: { color: "#9ca3af" },
               grid: { color: "rgba(55,65,81,0.6)" }
@@ -1090,25 +1078,24 @@ function toggleStart() {
     // INIT
     // -------------------------------------------------------
     function init() {
-  localStorage.removeItem("feeder_trener_pro_sessions"); // <<< DODANE
+      // localStorage.removeItem("feeder_trener_pro_sessions"); // WYŁĄCZONE KASOWANIE HISTORII
 
-  fishingTotalSeconds = FISHING_DEFAULT_HOURS * 3600;
-  intervalTotalSeconds = INTERVAL_DEFAULT_MIN * 60;
+      fishingTotalSeconds = FISHING_DEFAULT_HOURS * 3600;
+      intervalTotalSeconds = INTERVAL_DEFAULT_MIN * 60;
 
-  fishingRemaining = fishingTotalSeconds;
-  intervalRemaining = intervalTotalSeconds;
-  elapsedSeconds = 0;
+      fishingRemaining = fishingTotalSeconds;
+      intervalRemaining = intervalTotalSeconds;
+      elapsedSeconds = 0;
 
-  events = [];
-  pressureSamples = [];
-  intervalExpiredNotified = false;
+      events = [];
+      pressureSamples = [];
+      intervalExpiredNotified = false;
 
-  updateTimers();
-  enableMainButtons(false);
-  initClock();
-  initWeather();
-}
-
+      updateTimers();
+      enableMainButtons(false);
+      initClock();
+      initWeather();
+    }
 
     document.addEventListener("DOMContentLoaded", init);
   </script>
