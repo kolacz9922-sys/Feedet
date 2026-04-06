@@ -3,375 +3,619 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#0f172a">
-    <title>Feeder Trener PRO</title>
+    <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Feeder%20Trener%22%2C%22short_name%22%3A%22Feeder%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230f172a%22%7D">
+    
+    <title>Feeder Trener PRO - FullScreen</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
-            --bg-dark: #0f172a; --bg-card: #1e293b;
-            --text-main: #f8fafc; --text-muted: #94a3b8;
-            --green: linear-gradient(135deg, #10b981, #059669);
-            --yellow: linear-gradient(135deg, #f59e0b, #d97706);
-            --red: linear-gradient(135deg, #ef4444, #b91c1c);
-            --blue: linear-gradient(135deg, #3b82f6, #2563eb);
-            --dark: linear-gradient(135deg, #334155, #1e293b);
-            --glass: rgba(255,255,255,0.05);
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --grad-green: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --grad-yellow: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            --grad-red: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+            --grad-blue: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            --grad-purple: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+            --grad-dark: linear-gradient(135deg, #334155 0%, #1e293b 100%);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-glow: 0 8px 24px rgba(0,0,0,0.4);
         }
-        * { box-sizing: border-box; font-family: sans-serif; user-select: none; }
-        
-        /* KLUCZOWA POPRAWKA NA TELEFONY: min-height: 100dvh naprawia ucięte buttony */
-        body { margin: 0; background: var(--bg-dark); color: var(--text-main); display: flex; flex-direction: column; min-height: 100vh; min-height: 100dvh; overflow-y: auto; }
-        
-        .top-bar { display: flex; justify-content: space-between; padding: 12px 15px; background: rgba(0,0,0,0.4); font-size: 12px; font-weight: bold; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .weather { color: #fbbf24; }
-        .controls { display: flex; gap: 12px; align-items: center; }
-        .icon-btn { background: none; border: none; font-size: 16px; cursor: pointer; padding: 0; }
-        .clock { color: #60a5fa; }
 
-        .timers { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; margin: 10px 15px; background: var(--glass); border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); }
+        body { 
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; 
+            background: var(--bg-gradient); 
+            color: var(--text-main); 
+            margin: 0; 
+            display: flex; 
+            flex-direction: column; 
+            min-height: 100vh;
+            min-height: 100dvh;
+            overflow-y: auto; 
+            /* Zapobiega przypadkowemu zaznaczaniu tekstu przy szybkim klikaniu */
+            user-select: none; 
+            -webkit-user-select: none;
+        }
+
+        .top-bar { 
+            display: flex; justify-content: space-between; padding: 6px 15px; 
+            background: rgba(0, 0, 0, 0.2); backdrop-filter: blur(10px);
+            font-size: 11px; color: var(--text-muted); align-items: center; 
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .weather-info { color: #fbbf24; font-weight: 600; letter-spacing: 0.5px; }
+        .real-clock { color: #60a5fa; font-weight: 700; font-size: 12px; letter-spacing: 1px;}
+        
+        .fs-btn {
+            background: none; border: none; color: #94a3b8; font-size: 16px; 
+            margin-left: 10px; cursor: pointer; transition: color 0.2s; padding: 0;
+        }
+        .fs-btn:active { color: white; transform: scale(0.9); }
+
+        .header { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 10px 20px; margin: 10px 15px;
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            border-radius: 20px; box-shadow: var(--accent-glow);
+        }
         .timer-box { text-align: center; }
-        .timer-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
-        .timer-val { font-size: 28px; font-weight: 900; }
-        #intervalTime { color: #10b981; }
+        .timer-label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 1px; margin-bottom: 3px; }
+        .timer-value { font-size: 28px; font-weight: 900; font-variant-numeric: tabular-nums; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        #sessionTimer { color: #e2e8f0; }
+        #intervalTimer { color: #10b981; }
+        .settings-icon { background: none; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; transition: color 0.2s; padding: 0;}
+        .settings-icon:active { color: white; transform: rotate(45deg); }
 
-        .actions { flex-grow: 1; display: flex; flex-direction: column; padding: 0 15px 15px; gap: 12px; }
-        .btn { flex: 1; border: none; border-radius: 20px; font-size: 24px; font-weight: 900; color: white; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: transform 0.1s; display: flex; justify-content: center; align-items: center; gap: 10px;}
-        .btn:active { transform: scale(0.97); }
-        .btn-p { background: var(--green); }
-        .btn-b { background: var(--yellow); color: #451a03; }
-        .btn-r { background: var(--red); }
-        .btn:disabled { opacity: 0.5; filter: grayscale(1); }
-
-        /* DOLNY PASEK ZAWSZE NA DOLE EKRANU */
-        .nav { display: flex; gap: 8px; padding: 15px; background: rgba(0,0,0,0.6); border-top: 1px solid rgba(255,255,255,0.1); margin-top: auto; position: sticky; bottom: 0; z-index: 10; }
-        .nav-btn { flex: 1; padding: 12px 0; border: none; border-radius: 12px; font-size: 11px; font-weight: 800; color: white; background: var(--dark); text-transform: uppercase; }
-        #startBtn { background: var(--blue); }
-
-        .modal { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.9); z-index: 100; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(5px); }
-        .modal-content { background: var(--bg-card); width: 100%; max-width: 500px; max-height: 90vh; border-radius: 20px; padding: 20px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.1); }
-        h3 { margin-top: 0; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
-        input, textarea { width: 100%; padding: 12px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 10px; margin-bottom: 15px; font-family: inherit; }
-        .btn-modal { width: 100%; padding: 14px; background: var(--blue); border: none; border-radius: 10px; color: white; font-weight: bold; font-size: 14px; margin-top: 5px; }
+        .main-content { flex-grow: 1; display: flex; flex-direction: column; padding: 0 15px 10px 15px; gap: 10px; }
+        .action-btn { 
+            flex: 1; border: none; border-radius: 24px; min-height: 80px;
+            font-size: 24px; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px;
+            color: white; cursor: pointer; 
+            transition: all 0.1s;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3), inset 0 2px 0 rgba(255,255,255,0.2);
+            position: relative; overflow: hidden;
+            /* Wymuszenie braku podświetlenia kliknięcia w Androidzie */
+            -webkit-tap-highlight-color: transparent; 
+        }
+        .action-btn:active { transform: scale(0.96) translateY(2px); box-shadow: 0 4px 10px rgba(0,0,0,0.4); }
+        .action-btn:disabled { opacity: 0.4; filter: grayscale(100%); cursor: not-allowed; transform: none; box-shadow: none; }
         
-        .chart-container { background: rgba(0,0,0,0.2); border-radius: 12px; padding: 10px; margin-bottom: 15px; height: 180px; }
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center; margin-bottom: 15px; }
-        .stat-box { background: rgba(0,0,0,0.2); padding: 10px; border-radius: 10px; font-size: 12px; color: var(--text-muted); }
-        .stat-val { display: block; font-size: 18px; font-weight: bold; color: white; margin-top: 4px; }
-        .history-item { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; margin-bottom: 10px; cursor: pointer; border: 1px solid transparent; }
+        .btn-przerzuc { background: var(--grad-green); text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        .btn-branie { background: var(--grad-yellow); color: #78350f; text-shadow: 0 1px 2px rgba(255,255,255,0.3); }
+        .btn-ryba { background: var(--grad-red); text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+
+        .footer { padding: 10px 15px 15px 15px; display: flex; gap: 8px; background: rgba(0,0,0,0.3); border-top: 1px solid var(--glass-border); }
+        .menu-btn { 
+            flex: 1; padding: 12px 2px; font-size: 10px; font-weight: 800; border: none; border-radius: 12px; 
+            cursor: pointer; text-transform: uppercase; color: white; letter-spacing: 0.5px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: transform 0.1s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .menu-btn:active { transform: scale(0.95); }
+        .btn-start { background: var(--grad-blue); }
+        .btn-chart { background: var(--grad-purple); }
+        .btn-history { background: var(--grad-yellow); color: #78350f; }
+        .btn-save { background: var(--grad-dark); border: 1px solid var(--glass-border); }
+
+        .modal { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); 
+            z-index: 100; justify-content: center; align-items: center; flex-direction: column; 
+            animation: fadeIn 0.2s ease-out;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        .modal-content { 
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); 
+            padding: 20px; border-radius: 24px; width: 85%; max-width: 500px; max-height: 85vh; overflow-y: auto; 
+            border: 1px solid var(--glass-border); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .modal-content h2 { margin-top: 0; font-size: 20px; color: #f8fafc; font-weight: 800; letter-spacing: -0.5px; border-bottom: 1px solid #334155; padding-bottom: 10px; margin-bottom: 15px;}
+        
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 11px; margin-bottom: 6px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;}
+        .input-group input, .input-group textarea { 
+            width: 100%; padding: 12px; background: rgba(0,0,0,0.2); 
+            border: 1px solid #334155; color: white; border-radius: 12px; 
+            box-sizing: border-box; font-family: inherit; font-size: 14px; transition: border-color 0.2s;
+        }
+        .input-group input:focus, .input-group textarea:focus { outline: none; border-color: #3b82f6; background: rgba(0,0,0,0.4); }
+        
+        .history-item { 
+            background: rgba(255,255,255,0.03); padding: 12px; margin-bottom: 10px; 
+            border-radius: 12px; border: 1px solid var(--glass-border); border-left: 4px solid #3b82f6; 
+            transition: background 0.2s;
+        }
+        .history-item:hover { background: rgba(255,255,255,0.06); }
+        .history-meta { font-size: 11px; color: var(--text-muted); margin-top: 6px; display: flex; gap: 8px;}
+        .history-notes { font-size: 12px; color: #cbd5e1; margin-top: 8px; font-style: italic; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 8px; }
+        .btn-delete-item { color: #ef4444; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border: none; font-size: 14px; cursor: pointer; padding: 8px; transition: background 0.2s; }
+        .btn-delete-item:active { background: rgba(239, 68, 68, 0.3); }
+
+        #exportArea { background: #1e293b; padding: 15px; border-radius: 16px; }
+        .charts-wrapper { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+        .chart-box { background: rgba(0,0,0,0.2); padding: 5px; border-radius: 12px; height: 160px; position: relative; border: 1px solid var(--glass-border); }
+        
+        .summary-box { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; margin-top: 15px; font-size: 12px; border: 1px solid var(--glass-border);}
+        .summary-box strong { color: #60a5fa; font-weight: 800; font-size: 14px;}
+        .summary-stats { display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid #334155; padding-bottom: 10px; }
+        .summary-weather { display: flex; flex-direction: column; gap: 4px; color: #94a3b8; font-size: 11px; }
+        .summary-notes-display { margin-top: 10px; padding-top: 10px; border-top: 1px dashed #475569; color: #cbd5e1; font-style: italic; display: none; line-height: 1.4; }
     </style>
 </head>
 <body>
 
     <div class="top-bar">
-        <div class="weather" id="weatherDisplay">⛅ Pobieranie...</div>
-        <div class="controls">
-            <button class="icon-btn" id="voiceBtn" onclick="toggleVoice()" style="color:var(--text-muted);">🎙️ Wył</button>
-            <span class="clock" id="clock">00:00:00</span>
-            <button class="icon-btn" onclick="toggleFS()" style="font-size: 18px;">🔲</button>
+        <span id="weatherDisplay" class="weather-info">⛅ Pobieranie...</span>
+        <div style="display:flex; align-items:center;">
+            <span class="real-clock" id="realClock">00:00:00</span>
+            <button class="fs-btn" onclick="toggleFullScreen()" title="Pełny Ekran">🔲</button>
         </div>
     </div>
 
-    <div class="timers">
+    <div class="header">
         <div class="timer-box">
-            <div class="timer-label">Czas Łowienia</div>
-            <div class="timer-val" id="sessionTime">04:00:00</div>
+            <div class="timer-label">Czas łowienia</div>
+            <div class="timer-value" id="sessionTimer">04:00:00</div>
         </div>
         <div class="timer-box">
             <div class="timer-label">Zestaw w wodzie</div>
-            <div class="timer-val" id="intervalTime">03:00</div>
+            <div id="intervalTimer" class="timer-value">03:00</div>
         </div>
-        <button class="icon-btn" onclick="openModal('settingsModal')" style="font-size:24px; color:var(--text-muted);">⚙️</button>
+        <button class="settings-icon" onclick="openSettings()">⚙️</button>
     </div>
 
-    <div class="actions">
-        <button class="btn btn-p" id="btnP" onclick="logEvent('PRZERZUĆ')" disabled>🔄 Przerzuć</button>
-        <button class="btn btn-b" id="btnB" onclick="logEvent('BRANIE')" disabled>⚠️ Branie</button>
-        <button class="btn btn-r" id="btnR" onclick="logEvent('RYBA')" disabled>🐟 Ryba</button>
+    <div class="main-content">
+        <button id="btnP" class="action-btn btn-przerzuc" onclick="logEvent('PRZERZUĆ')" disabled>🔄 Przerzuć</button>
+        <button id="btnB" class="action-btn btn-branie" onclick="logEvent('BRANIE')" disabled>⚠️ Branie</button>
+        <button id="btnR" class="action-btn btn-ryba" onclick="logEvent('RYBA')" disabled>🐟 Ryba</button>
     </div>
 
-    <div class="nav">
-        <button class="nav-btn" id="startBtn" onclick="toggleSession()">▶ Start</button>
-        <button class="nav-btn" onclick="openChartModal()">📊 Wykres</button>
-        <button class="nav-btn" onclick="openHistory()">📁 Historia</button>
-        <button class="nav-btn" onclick="openModal('saveModal')">💾 Zapisz</button>
-    </div>
-
-    <div id="settingsModal" class="modal">
-        <div class="modal-content">
-            <h3>⚙️ Ustawienia Czasu</h3>
-            <label style="font-size:12px;color:var(--text-muted);">Czas łowienia (godziny)</label>
-            <input type="number" id="inpHours" value="4" min="1">
-            <label style="font-size:12px;color:var(--text-muted);">Zestaw w wodzie (minuty)</label>
-            <input type="number" id="inpMins" value="3" min="1">
-            <div style="display:flex; gap:10px;">
-                <button class="btn-modal" style="background:var(--dark);" onclick="closeModal('settingsModal')">Anuluj</button>
-                <button class="btn-modal" onclick="applySettings()">Zapisz</button>
-            </div>
-        </div>
+    <div class="footer">
+        <button class="menu-btn btn-start" id="startBtn" onclick="toggleSession()">▶ Start</button>
+        <button class="menu-btn btn-chart" onclick="showCurrentChart()">📊 Wykres</button>
+        <button class="menu-btn btn-history" onclick="openHistory()">📁 Historia</button>
+        <button class="menu-btn btn-save" onclick="openSaveModal()">💾 Zapisz</button>
     </div>
 
     <div id="saveModal" class="modal">
         <div class="modal-content">
-            <h3>💾 Zapisz Sesję</h3>
-            <input type="text" id="inpName" placeholder="Nazwa łowiska / Zawody">
-            <textarea id="inpNotes" rows="4" placeholder="Dziennik Wędkarski (zanęta, wnioski...)"></textarea>
-            <div style="display:flex; gap:10px;">
-                <button class="btn-modal" style="background:var(--dark);" onclick="closeModal('saveModal')">Anuluj</button>
-                <button class="btn-modal" style="background:var(--green);" onclick="saveSession()">Zapisz do Historii</button>
+            <h2>Zapisz Sesję</h2>
+            <div class="input-group">
+                <label>Nazwa Łowiska / Zawodów:</label>
+                <input type="text" id="saveName" placeholder="Np. Podgórki Tynieckie Tura 1">
+            </div>
+            <div class="input-group">
+                <label>Dziennik (zanęta, przynęty, wnioski):</label>
+                <textarea id="saveNotes" rows="4" placeholder="Np. Zanęta z dużą ilością jokersa..."></textarea>
+            </div>
+            <div class="modal-actions" style="display:flex; gap:10px; margin-top:20px;">
+                <button onclick="closeSaveModal()" style="flex:1; padding:12px; background:#475569; color:white; border:none; border-radius:12px; font-weight:700; cursor:pointer;">Anuluj</button>
+                <button onclick="confirmSave()" style="flex:1; padding:12px; background:var(--grad-green); color:white; border:none; border-radius:12px; font-weight:700; cursor:pointer;">Zapisz</button>
             </div>
         </div>
     </div>
 
     <div id="historyModal" class="modal">
         <div class="modal-content">
-            <h3>📁 Historia Sesji</h3>
+            <h2>Archiwum Sesji</h2>
             <div id="historyList"></div>
-            <button class="btn-modal" style="background:var(--dark);" onclick="closeModal('historyModal')">Zamknij</button>
+            <button onclick="closeHistory()" style="width:100%; padding:12px; margin-top:15px; background:#475569; color:white; border:none; border-radius:12px; font-weight:700; cursor:pointer;">Zamknij</button>
+        </div>
+    </div>
+
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <h2>Konfiguracja</h2>
+            <div class="input-group">
+                <label>Czas trwania tury (godziny):</label>
+                <input type="number" id="inputSessionDuration" value="4">
+            </div>
+            <div class="input-group">
+                <label>Czas rzutu / Interwał (minuty):</label>
+                <input type="number" id="inputInterval" value="3">
+            </div>
+            <button onclick="applySettings()" style="width:100%; padding:12px; margin-top:10px; background:var(--grad-blue); color:white; border:none; border-radius:12px; font-weight:700; cursor:pointer;">Zastosuj</button>
         </div>
     </div>
 
     <div id="chartModal" class="modal">
-        <div class="modal-content" style="padding:0; background:transparent; border:none; max-width:800px;">
-            <div id="exportArea" style="background:var(--bg-card); padding:20px; border-radius:20px;">
-                <h3 id="chartTitle">Analiza Sesji</h3>
-                <div class="chart-container"><canvas id="scatterChart"></canvas></div>
-                <div class="chart-container"><canvas id="lineChart"></canvas></div>
-                
-                <div class="stats-grid">
-                    <div class="stat-box">🐟 Ryby <span class="stat-val" id="stRyby" style="color:#ef4444;">0</span></div>
-                    <div class="stat-box">⚠️ Brania <span class="stat-val" id="stBrania" style="color:#f59e0b;">0</span></div>
-                    <div class="stat-box">🔄 Rzuty <span class="stat-val" id="stRzuty" style="color:#10b981;">0</span></div>
+        <div class="modal-content" style="width: 95%; max-width: 800px; padding: 0; background: transparent; border: none; box-shadow: none;">
+            
+            <div id="exportArea">
+                <h3 style="color: white; margin-top: 0; margin-bottom: 10px; font-size: 18px;" id="chartModalTitle">Analiza Sesji</h3>
+                <div class="charts-wrapper">
+                    <div class="chart-box"><canvas id="sessionChart"></canvas></div>
+                    <div class="chart-box"><canvas id="pressureChart"></canvas></div>
                 </div>
                 
-                <div style="background:rgba(0,0,0,0.2); padding:10px; border-radius:10px; font-size:12px; margin-bottom:10px;">
-                    <span style="color:var(--text-muted);">Pogoda:</span> <strong id="stPogoda">--</strong>
-                </div>
-                <div style="background:rgba(0,0,0,0.2); padding:10px; border-radius:10px; font-size:12px; font-style:italic;">
-                    <span style="color:var(--text-muted);">Dziennik:</span> <span id="stNotes">Brak notatek.</span>
+                <div class="summary-box">
+                    <div class="summary-stats">
+                        <span>🐟 Ryby: <strong id="sumRyby" style="color: #ef4444;">0</strong></span>
+                        <span>⚠️ Brania: <strong id="sumBrania" style="color: #f59e0b;">0</strong></span>
+                        <span>🔄 Rzuty: <strong id="sumRzuty" style="color: #10b981;">0</strong></span>
+                    </div>
+                    <div class="summary-weather" id="sumWeather"></div>
+                    <div class="summary-notes-display" id="sumNotesDisplay"></div>
                 </div>
             </div>
+
             <div style="display:flex; gap:10px; margin-top:15px;">
-                <button class="btn-modal" style="background:var(--dark);" onclick="closeModal('chartModal')">Zamknij</button>
-                <button class="btn-modal" onclick="exportJPG()">📸 Pobierz (JPG)</button>
+                <button onclick="closeChart()" style="flex:1; padding:12px; background:rgba(0,0,0,0.5); color:white; border:1px solid #475569; border-radius:12px; font-weight:700; cursor:pointer;">Zamknij</button>
+                <button onclick="exportToJPG()" style="flex:2; padding:12px; background:var(--grad-blue); color:white; border:none; border-radius:12px; font-weight:800; cursor:pointer;">📸 Pobierz (JPG)</button>
             </div>
         </div>
     </div>
 
     <script>
-        let isRunning = false;
-        let cHours = 4, cMins = 3;
-        let secElapsed = 0, secInterval = 180;
-        let timerMain, timerWeather;
-        let events = [], pressures = [];
-        let curTemp = "--", curPres = "--", curWind = "--";
-        let c1, c2;
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.scale.grid.color = 'rgba(255, 255, 255, 0.05)';
+        Chart.defaults.font.family = "'Inter', sans-serif";
 
-        setInterval(() => document.getElementById('clock').innerText = new Date().toLocaleTimeString('pl-PL'), 1000);
-        
-        // POPRAWKA: Pełny ekran działający w telefonach
-        function toggleFS() { 
-            let elem = document.documentElement;
-            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-                if (elem.requestFullscreen) { elem.requestFullscreen(); }
-                else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); }
+        setInterval(() => { document.getElementById('realClock').innerText = new Date().toLocaleTimeString('pl-PL'); }, 1000);
+
+        // FUNKCJA PEŁNEGO EKRANU
+        function toggleFullScreen() {
+            if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement ) {  
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen();
+                } else if (document.documentElement.msRequestFullscreen) {
+                    document.documentElement.msRequestFullscreen();
+                } else if (document.documentElement.mozRequestFullScreen) {
+                    document.documentElement.mozRequestFullScreen();
+                } else if (document.documentElement.webkitRequestFullscreen) {
+                    document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+                }
             } else {
-                if (document.exitFullscreen) { document.exitFullscreen(); }
-                else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); }
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                }
             }
         }
 
-        let aCtx;
+        let currentTemp = "--";
+        let currentPressure = "--";
+        let currentWind = "--";
+        let currentWindDir = "--";
+        let latKrakow = 50.0614, lonKrakow = 19.9366; 
+
+        let audioCtx;
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
         function playBeep() {
-            if(!aCtx) aCtx = new (window.AudioContext || window.webkitAudioContext)();
-            if(aCtx.state === 'suspended') aCtx.resume();
-            let o = aCtx.createOscillator(), g = aCtx.createGain();
-            o.connect(g); g.connect(aCtx.destination);
-            o.frequency.value = 1000; o.type = 'triangle'; g.gain.value = 0.1;
-            o.start(); setTimeout(() => o.stop(), 150);
-            if(navigator.vibrate) navigator.vibrate([100]);
-        }
+            if (!audioCtx) return;
 
-        const SRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-        let rec = null, isList = false;
+            const duration = 0.15; 
+            const gap = 0.1;       
+            const freq = 1046.50;  
 
-        if(SRec) {
-            rec = new SRec(); rec.lang = 'pl-PL'; rec.continuous = true;
-            rec.onresult = (e) => {
-                if(!isList) return;
-                const txt = e.results[e.results.length-1][0].transcript.toLowerCase();
+            for (let i = 0; i < 3; i++) {
+                const startTime = audioCtx.currentTime + (i * (duration + gap));
                 
-                if(txt.includes("trener")) {
-                    if(txt.includes("ryba") || txt.includes("mam")) handleVoice('RYBA');
-                    else if(txt.includes("branie") || txt.includes("puste")) handleVoice('BRANIE');
-                    else if(txt.includes("przerzuć") || txt.includes("rzut")) handleVoice('PRZERZUĆ');
-                    else if(txt.includes("czas na")) {
-                        const match = txt.match(/\d+/);
-                        const words = {"jeden":1,"dwa":2,"trzy":3,"cztery":4,"pięć":5,"sześć":6,"siedem":7,"osiem":8,"dziewięć":9,"dziesięć":10};
-                        let val = match ? parseInt(match[0]) : null;
-                        if(!val) for(let w in words) if(txt.includes(w)) val = words[w];
-                        
-                        if(val) {
-                            cMins = val; secInterval = val * 60;
-                            document.getElementById('intervalTime').innerText = formatTime(secInterval);
-                            if(navigator.vibrate) navigator.vibrate(500);
-                        }
-                    }
-                }
-            };
-            rec.onend = () => { if(isList) rec.start(); };
+                const osc = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                
+                osc.type = 'triangle'; 
+                osc.frequency.setValueAtTime(freq, startTime);
+                
+                gainNode.gain.setValueAtTime(0, startTime);
+                gainNode.gain.linearRampToValueAtTime(1, startTime + 0.02); 
+                gainNode.gain.setValueAtTime(1, startTime + duration - 0.05);
+                gainNode.gain.linearRampToValueAtTime(0, startTime + duration); 
+                
+                osc.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                osc.start(startTime);
+                osc.stop(startTime + duration);
+            }
+
+            if ("vibrate" in navigator) {
+                navigator.vibrate([150, 100, 150, 100, 150]);
+            }
         }
 
-        function handleVoice(action) {
-            isList = false; rec.stop(); 
-            logEvent(action, true);    
-            setTimeout(() => { if(!isList) { isList = true; rec.start(); } }, 1500); 
+        function getWindDirectionPl(degree) {
+            if (degree === undefined || degree === null) return "Brak";
+            if (degree >= 337.5 || degree < 22.5) return 'Północny (N)';
+            if (degree >= 22.5 && degree < 67.5) return 'Północno-wschodni (NE)';
+            if (degree >= 67.5 && degree < 112.5) return 'Wschodni (E)';
+            if (degree >= 112.5 && degree < 157.5) return 'Południowo-wschodni (SE)';
+            if (degree >= 157.5 && degree < 202.5) return 'Południowy (S)';
+            if (degree >= 202.5 && degree < 247.5) return 'Południowo-zachodni (SW)';
+            if (degree >= 247.5 && degree < 292.5) return 'Zachodni (W)';
+            if (degree >= 292.5 && degree < 337.5) return 'Północno-zachodni (NW)';
+            return 'Zmienny';
         }
 
-        function toggleVoice() {
-            if(!rec) return alert("Brak wsparcia mowy.");
-            isList = !isList;
-            isList ? rec.start() : rec.stop();
-            const b = document.getElementById('voiceBtn');
-            b.innerText = isList ? "🎙️ Wł" : "🎙️ Wył";
-            b.style.color = isList ? "#ef4444" : "var(--text-muted)";
-        }
-
-        function formatTime(s, h=false) {
-            if(s<0) s=0;
-            let hh = Math.floor(s/3600), mm = Math.floor((s%3600)/60), ss = s%60;
-            let p = x => x.toString().padStart(2,'0');
-            return h ? `${p(hh)}:${p(mm)}:${p(ss)}` : `${p(mm)}:${p(ss)}`;
-        }
-
-        async function getWeather() {
+        async function fetchCurrentWeather(lat, lon) {
             try {
-                let res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=50.06&longitude=19.94&current=temperature_2m,surface_pressure,wind_speed_10m,wind_direction_10m`);
-                let d = await res.json();
-                curTemp = d.current.temperature_2m; curPres = d.current.surface_pressure; 
-                let wd = d.current.wind_direction_10m; let dir = ['N','NE','E','SE','S','SW','W','NW'][Math.round(wd/45)%8];
-                curWind = `${d.current.wind_speed_10m} km/h (${dir})`;
-                document.getElementById('weatherDisplay').innerText = `⛅ ${curTemp}°C | ${curPres} hPa | ${curWind}`;
-                return curPres;
-            } catch(e) { return null; }
+                const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,surface_pressure,wind_speed_10m,wind_direction_10m`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                currentTemp = data.current.temperature_2m;
+                currentPressure = data.current.surface_pressure;
+                currentWind = data.current.wind_speed_10m;
+                currentWindDir = getWindDirectionPl(data.current.wind_direction_10m);
+                
+                document.getElementById('weatherDisplay').innerText = `⛅ ${currentTemp}°C | ${currentPressure} hPa | ${currentWind} km/h`;
+                return currentPressure;
+            } catch (e) {
+                return null;
+            }
         }
-        getWeather();
+
+        navigator.geolocation.getCurrentPosition(
+            pos => fetchCurrentWeather(pos.coords.latitude, pos.coords.longitude),
+            err => fetchCurrentWeather(latKrakow, lonKrakow) 
+        );
+
+        let isSessionActive = false;
+        let sessionSecondsElapsed = 0; 
+        let configSessionHours = 4;
+        let configIntervalMinutes = 3; 
+        let intervalSeconds = configIntervalMinutes * 60;
+        
+        let mainIntervalId = null;
+        let pressureIntervalId = null;
+        
+        let eventsLog = []; 
+        let pressureLog = []; 
+        
+        let chart1 = null;
+        let chart2 = null;
+
+        const sessionTimerEl = document.getElementById('sessionTimer');
+        const intervalTimerEl = document.getElementById('intervalTimer');
+        const startBtn = document.getElementById('startBtn');
+        const actionBtns = [document.getElementById('btnP'), document.getElementById('btnB'), document.getElementById('btnR')];
+
+        function formatTime(totalSeconds, includeHours = false) {
+            if (totalSeconds < 0) totalSeconds = 0;
+            const h = Math.floor(totalSeconds / 3600);
+            const m = Math.floor((totalSeconds % 3600) / 60);
+            const s = totalSeconds % 60;
+            const pad = (num) => num.toString().padStart(2, '0');
+            return includeHours ? `${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
+        }
+
+        async function logPressure() {
+            const pressure = await fetchCurrentWeather(latKrakow, lonKrakow);
+            if (pressure) pressureLog.push({ timeSec: sessionSecondsElapsed, pressure: pressure });
+        }
+
+        function tick() {
+            sessionSecondsElapsed++;
+            let timeLeft = (configSessionHours * 3600) - sessionSecondsElapsed;
+            sessionTimerEl.innerText = formatTime(timeLeft, true);
+            
+            if (intervalSeconds > 0) {
+                intervalSeconds--;
+                intervalTimerEl.innerText = formatTime(intervalSeconds);
+                if (intervalSeconds === 0) { 
+                    intervalTimerEl.style.color = "#ef4444"; 
+                    playBeep(); 
+                }
+            }
+        }
 
         function toggleSession() {
-            isRunning = !isRunning;
-            const b = document.getElementById('startBtn');
-            ['btnP','btnB','btnR'].forEach(id => document.getElementById(id).disabled = !isRunning);
+            initAudio(); 
             
-            if(isRunning) {
-                b.innerText = "⏸ Pauza"; b.style.background = "var(--dark)";
-                getWeather().then(p => { if(p) pressures.push({x: secElapsed/60, y: p}); });
-                weatherInterval = setInterval(() => { getWeather().then(p => { if(p) pressures.push({x: secElapsed/60, y: p}); }); }, 900000);
+            if (!isSessionActive) {
+                isSessionActive = true;
+                startBtn.innerHTML = "⏸ Pauza";
+                startBtn.style.background = "var(--grad-dark)";
+                actionBtns.forEach(btn => btn.disabled = false);
                 
-                timerMain = setInterval(() => {
-                    secElapsed++;
-                    document.getElementById('sessionTime').innerText = formatTime((cHours*3600)-secElapsed, true);
-                    if(secInterval > 0) {
-                        secInterval--;
-                        let it = document.getElementById('intervalTime');
-                        it.innerText = formatTime(secInterval);
-                        if(secInterval === 0) { it.style.color = "#ef4444"; playBeep(); }
-                    }
-                }, 1000);
+                mainIntervalId = setInterval(tick, 1000);
+                logPressure();
+                pressureIntervalId = setInterval(logPressure, 900000); 
             } else {
-                b.innerText = "▶ Start"; b.style.background = "var(--blue)";
-                clearInterval(timerMain); clearInterval(weatherInterval);
+                isSessionActive = false;
+                startBtn.innerHTML = "▶ Start";
+                startBtn.style.background = "var(--grad-blue)";
+                clearInterval(mainIntervalId);
+                clearInterval(pressureIntervalId);
             }
         }
 
-        function logEvent(type, fromVoice = false) {
-            if(!isRunning) return;
-            events.push({ time: secElapsed, type: type });
-            
-            secInterval = cMins * 60;
-            let it = document.getElementById('intervalTime');
-            it.style.color = "#10b981"; it.innerText = formatTime(secInterval);
-            
-            if(!fromVoice) playBeep(); else if(navigator.vibrate) navigator.vibrate([300]);
+        function logEvent(actionType) {
+            initAudio();
+            eventsLog.push({ timeSec: sessionSecondsElapsed, action: actionType, realTime: new Date().toLocaleTimeString('pl-PL') });
+            intervalSeconds = configIntervalMinutes * 60;
+            intervalTimerEl.innerText = formatTime(intervalSeconds);
+            intervalTimerEl.style.color = "#10b981";
         }
 
-        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
-        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        function openSettings() { document.getElementById('settingsModal').style.display = 'flex'; }
         
         function applySettings() {
-            cHours = parseInt(document.getElementById('inpHours').value);
-            cMins = parseInt(document.getElementById('inpMins').value);
-            secInterval = cMins * 60;
-            document.getElementById('intervalTime').innerText = formatTime(secInterval);
-            if(!isRunning) document.getElementById('sessionTime').innerText = formatTime(cHours*3600, true);
-            closeModal('settingsModal');
+            configSessionHours = parseInt(document.getElementById('inputSessionDuration').value);
+            configIntervalMinutes = parseInt(document.getElementById('inputInterval').value);
+            
+            intervalSeconds = configIntervalMinutes * 60;
+            intervalTimerEl.innerText = formatTime(intervalSeconds);
+            intervalTimerEl.style.color = "#10b981"; 
+            
+            if (!isSessionActive) {
+                let timeLeft = configSessionHours * 3600;
+                sessionTimerEl.innerText = formatTime(timeLeft, true);
+                sessionTimerEl.style.color = "#e2e8f0";
+            }
+
+            document.getElementById('settingsModal').style.display = 'none';
         }
 
-        function drawCharts(evData, prData, title, wData, notes) {
-            document.getElementById('chartTitle').innerText = title;
-            document.getElementById('stRyby').innerText = evData.filter(e => e.type==='RYBA').length;
-            document.getElementById('stBrania').innerText = evData.filter(e => e.type==='BRANIE').length;
-            document.getElementById('stRzuty').innerText = evData.filter(e => e.type==='PRZERZUĆ').length;
-            document.getElementById('stPogoda').innerText = wData ? `${wData.t}°C, ${wData.p} hPa, Wiatr: ${wData.w}` : "Brak danych";
-            document.getElementById('stNotes').innerText = notes || "Brak notatek.";
-            
-            if(c1) c1.destroy(); if(c2) c2.destroy();
-            let maxX = Math.max(60, Math.ceil((evData.length ? evData[evData.length-1].time : secElapsed)/60) + 5);
-            
-            Chart.defaults.color = '#94a3b8';
-            c1 = new Chart(document.getElementById('scatterChart'), {
-                type: 'scatter',
-                data: { datasets: [
-                    { label: 'Rzut', data: evData.filter(e=>e.type==='PRZERZUĆ').map(e=>({x:e.time/60, y:1})), backgroundColor: '#10b981' },
-                    { label: 'Branie', data: evData.filter(e=>e.type==='BRANIE').map(e=>({x:e.time/60, y:2})), backgroundColor: '#f59e0b', pointRadius:5 },
-                    { label: 'Ryba', data: evData.filter(e=>e.type==='RYBA').map(e=>({x:e.time/60, y:3})), backgroundColor: '#ef4444', pointRadius:6 }
-                ]},
-                options: { maintainAspectRatio: false, plugins: {legend:{display:false}}, scales: { x: {type:'linear', min:0, max:maxX, display:false}, y: {min:0, max:4, ticks:{stepSize:1, callback:v=>['','Rzut','Branie','Ryba',''][v]}} } }
-            });
-
-            c2 = new Chart(document.getElementById('lineChart'), {
-                type: 'line',
-                data: { datasets: [{ data: prData, borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.1)', fill: true, tension: 0.4 }]},
-                options: { maintainAspectRatio: false, plugins: {legend:{display:false}}, scales: { x: {type:'linear', min:0, max:maxX, title:{display:true, text:'Czas (minuty)'}} } }
-            });
-            openModal('chartModal');
+        function openSaveModal() {
+            document.getElementById('saveModal').style.display = 'flex';
+            document.getElementById('saveName').value = "Sesja - " + new Date().toLocaleDateString();
         }
-
-        function openChartModal() { drawCharts(events, pressures, "Analiza na żywo", {t:curTemp, p:curPres, w:curWind}, ""); }
+        function closeSaveModal() { document.getElementById('saveModal').style.display = 'none'; }
         
-        function exportJPG() {
-            let trg = document.getElementById('exportArea');
-            html2canvas(trg, {scale: 2, backgroundColor: "#1e293b"}).then(canvas => {
-                let a = document.createElement('a'); a.download = 'Raport.jpg';
-                a.href = canvas.toDataURL('image/jpeg', 0.9); a.click();
-            });
-        }
-
-        function saveSession() {
-            let hist = JSON.parse(localStorage.getItem('f_hist')) || [];
-            hist.push({
+        function confirmSave() {
+            const name = document.getElementById('saveName').value;
+            const notes = document.getElementById('saveNotes').value;
+            const sessions = JSON.parse(localStorage.getItem('feeder_sessions_v7')) || [];
+            
+            sessions.push({
                 id: Date.now(),
-                name: document.getElementById('inpName').value || 'Trening',
+                name: name,
+                notes: notes,
+                weatherObj: { temp: currentTemp, wind: currentWind, dir: currentWindDir, pressure: currentPressure },
                 date: new Date().toLocaleString(),
-                notes: document.getElementById('inpNotes').value,
-                events: events, pressures: pressures,
-                weather: {t:curTemp, p:curPres, w:curWind}
+                events: eventsLog,
+                pressures: pressureLog 
             });
-            localStorage.setItem('f_hist', JSON.stringify(hist));
-            closeModal('saveModal'); alert('Sesja zapisana pomyślnie!'); location.reload();
+            
+            localStorage.setItem('feeder_sessions_v7', JSON.stringify(sessions));
+            alert("Sesja zapisana! Możesz ją znaleźć w Historii.");
+            location.reload();
         }
 
         function openHistory() {
-            let hist = JSON.parse(localStorage.getItem('f_hist')) || [];
-            let list = document.getElementById('historyList'); list.innerHTML = '';
-            if(!hist.length) list.innerHTML = '<p style="text-align:center; color:gray;">Brak zapisów</p>';
-            hist.slice().reverse().forEach(h => {
-                let div = document.createElement('div'); div.className = 'history-item';
-                div.innerHTML = `<strong style="color:white;">${h.name}</strong><br><small>${h.date}</small>`;
-                div.onclick = () => { closeModal('historyModal'); drawCharts(h.events, h.pressures, h.name, h.weather, h.notes); };
-                list.appendChild(div);
+            const list = document.getElementById('historyList');
+            list.innerHTML = '';
+            const sessions = JSON.parse(localStorage.getItem('feeder_sessions_v7')) || [];
+            
+            sessions.slice().reverse().forEach(s => {
+                const item = document.createElement('div');
+                item.className = 'history-item';
+                const w = s.weatherObj || { temp: '?', wind: '?', dir: '?', pressure: '?' };
+                item.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:start;">
+                        <div onclick="showSessionChart('${s.id}')" style="flex-grow:1; cursor:pointer;">
+                            <strong style="color:#60a5fa; font-size:14px;">${s.name}</strong>
+                            <div class="history-meta"><span>📅 ${s.date}</span> <span>🌡️ ${w.temp}°C</span></div>
+                            ${s.notes ? `<div class="history-notes">📝 ${s.notes}</div>` : ''}
+                        </div>
+                        <button class="btn-delete-item" onclick="deleteSession('${s.id}')">🗑️</button>
+                    </div>
+                `;
+                list.appendChild(item);
             });
-            openModal('historyModal');
+            
+            document.getElementById('historyModal').style.display = 'flex';
         }
+
+        function deleteSession(id) {
+            if(confirm("Czy na pewno chcesz usunąć tę sesję z archiwum?")) {
+                let sessions = JSON.parse(localStorage.getItem('feeder_sessions_v7'));
+                sessions = sessions.filter(s => s.id != id);
+                localStorage.setItem('feeder_sessions_v7', JSON.stringify(sessions));
+                openHistory();
+            }
+        }
+
+        function showSessionChart(id) {
+            const sessions = JSON.parse(localStorage.getItem('feeder_sessions_v7'));
+            const s = sessions.find(x => x.id == id);
+            document.getElementById('historyModal').style.display = 'none';
+            
+            const w = s.weatherObj || { temp: '-', wind: '-', dir: '-', pressure: '-' };
+            renderDualCharts(s.events, s.pressures || [], s.name, w, s.notes);
+        }
+
+        function showCurrentChart() {
+            if(eventsLog.length === 0 && pressureLog.length === 0) { alert("Brak danych. Wystartuj sesję i zacznij łowić."); return; }
+            const w = { temp: currentTemp, wind: currentWind, dir: currentWindDir, pressure: currentPressure };
+            renderDualCharts(eventsLog, pressureLog, "Bieżąca Sesja (Na Żywo)", w, "Sesja w trakcie. Dodaj notatki podczas zapisu.");
+        }
+
+        function renderDualCharts(eventsData, pressureData, titleText, weatherData, notesText) {
+            document.getElementById('chartModalTitle').innerText = titleText;
+            
+            document.getElementById('sumRyby').innerText = eventsData.filter(d => d.action === 'RYBA').length;
+            document.getElementById('sumBrania').innerText = eventsData.filter(d => d.action === 'BRANIE').length;
+            document.getElementById('sumRzuty').innerText = eventsData.filter(d => d.action === 'PRZERZUĆ').length;
+            
+            document.getElementById('sumWeather').innerHTML = `
+                <span>🌡️ Temp: <strong style="color:white;">${weatherData.temp}°C</strong> | ⏱️ Ciśn: <strong style="color:white;">${weatherData.pressure} hPa</strong></span>
+                <span>💨 Wiatr: <strong style="color:white;">${weatherData.wind} km/h</strong> (${weatherData.dir})</span>
+            `;
+
+            const notesEl = document.getElementById('sumNotesDisplay');
+            if (notesText && notesText.trim() !== "") {
+                notesEl.style.display = "block";
+                notesEl.innerHTML = `<strong>Dziennik Wędkarski:</strong><br><span style="color:#f8fafc;">${notesText.replace(/\n/g, '<br>')}</span>`;
+            } else {
+                notesEl.style.display = "none";
+            }
+
+            document.getElementById('chartModal').style.display = 'flex';
+            
+            let maxTimeSec = 0;
+            if (eventsData.length > 0) maxTimeSec = Math.max(maxTimeSec, eventsData[eventsData.length-1].timeSec);
+            if (pressureData.length > 0) maxTimeSec = Math.max(maxTimeSec, pressureData[pressureData.length-1].timeSec);
+            let maxX = Math.max(60, Math.ceil(maxTimeSec / 60) + 10); 
+
+            if (chart1) chart1.destroy();
+            if (chart2) chart2.destroy();
+
+            const ctx1 = document.getElementById('sessionChart').getContext('2d');
+            chart1 = new Chart(ctx1, {
+                type: 'scatter',
+                data: {
+                    datasets: [
+                        { label: 'Przerzut', data: eventsData.filter(d => d.action === 'PRZERZUĆ').map(d => ({ x: d.timeSec / 60, y: 1, rt: d.realTime })), backgroundColor: '#10b981', pointRadius: 4 },
+                        { label: 'Branie', data: eventsData.filter(d => d.action === 'BRANIE').map(d => ({ x: d.timeSec / 60, y: 2, rt: d.realTime })), backgroundColor: '#f59e0b', pointRadius: 5 },
+                        { label: 'Ryba', data: eventsData.filter(d => d.action === 'RYBA').map(d => ({ x: d.timeSec / 60, y: 3, rt: d.realTime })), backgroundColor: '#ef4444', pointRadius: 6 }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => `${c.dataset.label}: ${c.raw.rt || ''}` } } },
+                    scales: { x: { display: false, min: 0, max: maxX }, y: { min: 0, max: 4, ticks: { stepSize: 1, callback: v => ['','Rzut','Branie','Ryba',''][v] } } }
+                }
+            });
+
+            const ctx2 = document.getElementById('pressureChart').getContext('2d');
+            const pData = pressureData.map(d => ({ x: d.timeSec / 60, y: d.pressure }));
+            chart2 = new Chart(ctx2, {
+                type: 'line',
+                data: { datasets: [{ label: 'Ciśnienie (hPa)', data: pData, borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.15)', borderWidth: 3, fill: true, tension: 0.4 }] },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { x: { title: { display: true, text: 'Czas trwania (minuty)' }, min: 0, max: maxX }, y: { title: { display: true, text: 'hPa' } } }
+                }
+            });
+        }
+
+        function exportToJPG() {
+            const target = document.getElementById('exportArea');
+            target.style.background = "#1e293b"; 
+            
+            html2canvas(target, { scale: 2 }).then(canvas => {
+                const link = document.createElement('a');
+                const fileNameDate = new Date().toISOString().slice(0,10);
+                link.download = `Raport_Feeder_${fileNameDate}.jpg`;
+                link.href = canvas.toDataURL('image/jpeg', 0.9);
+                link.click();
+            });
+        }
+
+        function closeHistory() { document.getElementById('historyModal').style.display = 'none'; }
+        function closeChart() { document.getElementById('chartModal').style.display = 'none'; }
     </script>
 </body>
 </html>
