@@ -428,7 +428,14 @@
                 actionBtns.forEach(btn => btn.disabled = false);
                 
                 mainIntervalId = setInterval(tick, 1000);
-                logPressure();
+                
+                // POPRAWKA: Natychmiastowe wrzucenie bieżącego ciśnienia na wykres w sekundzie '0'
+                if (currentPressure !== "--") {
+                    pressureLog.push({ timeSec: sessionSecondsElapsed, pressure: currentPressure });
+                } else {
+                    logPressure();
+                }
+                
                 pressureIntervalId = setInterval(logPressure, 900000); 
             } else {
                 isSessionActive = false;
@@ -437,7 +444,7 @@
                 clearInterval(mainIntervalId);
                 clearInterval(pressureIntervalId);
             }
-        }
+              }
 
         function logEvent(actionType) {
             initAudio();
@@ -584,7 +591,10 @@
                 options: {
                     responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => `${c.dataset.label}: ${c.raw.rt || ''}` } } },
-                    scales: { x: { display: false, min: 0, max: maxX }, y: { min: 0, max: 4, ticks: { stepSize: 1, callback: v => ['','Rzut','Branie','Ryba',''][v] } } }
+                    scales: { 
+                        x: { type: 'linear', display: false, min: 0, max: maxX }, 
+                        y: { min: 0, max: 4, ticks: { stepSize: 1, callback: v => ['','Rzut','Branie','Ryba',''][v] } } 
+                    }
                 }
             });
 
@@ -596,7 +606,10 @@
                 options: {
                     responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
-                    scales: { x: { title: { display: true, text: 'Czas trwania (minuty)' }, min: 0, max: maxX }, y: { title: { display: true, text: 'hPa' } } }
+                    scales: { 
+                        x: { type: 'linear', title: { display: true, text: 'Czas trwania (minuty)' }, min: 0, max: maxX }, 
+                        y: { title: { display: false } } 
+                    }
                 }
             });
         }
