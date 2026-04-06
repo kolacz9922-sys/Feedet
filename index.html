@@ -444,7 +444,7 @@
                 clearInterval(mainIntervalId);
                 clearInterval(pressureIntervalId);
             }
-              }
+        }
 
         function logEvent(actionType) {
             initAudio();
@@ -602,7 +602,18 @@
             const pData = pressureData.map(d => ({ x: d.timeSec / 60, y: d.pressure }));
             chart2 = new Chart(ctx2, {
                 type: 'line',
-                data: { datasets: [{ label: 'Ciśnienie (hPa)', data: pData, borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.15)', borderWidth: 3, fill: true, tension: 0.4 }] },
+                data: { 
+                    datasets: [{ 
+                        label: 'Ciśnienie (hPa)', 
+                        data: pData, 
+                        borderColor: '#3b82f6', 
+                        backgroundColor: 'rgba(59, 130, 246, 0.15)', 
+                        borderWidth: 3, 
+                        fill: true, 
+                        tension: 0.5, 
+                        cubicInterpolationMode: 'monotone' 
+                    }] 
+                },
                 options: {
                     responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
