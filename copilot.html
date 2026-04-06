@@ -43,12 +43,10 @@
       padding-bottom: 80px;
     }
     .app {
-      width: 100%;
-      max-width: 480px;
-      padding: 12px;
+      min-height: calc(100vh - 80px);
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      
     }
     .glass {
       background: var(--glass);
@@ -117,13 +115,16 @@
        MAIN BUTTONS (ROZCIĄGNIĘTE)
     ------------------------------------------------------- */
     .actions {
+      flex: 1;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   gap: 12px;
-  width: 100%;
+  
 }
 
 .btn-main {
+  flex: 1;
   width: 100%;
   height: 100px; /* <<< DUŻE, WYSOKIE PRZYCISKI */
   border-radius: var(--radius);
@@ -132,8 +133,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 14px;
-  font-size: 24px;
+  
+  font-size: 26px;
   font-weight: 700;
   cursor: pointer;
 
