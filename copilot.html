@@ -407,6 +407,10 @@
                 <div><div class="stats-label">Ciśnienie</div><div class="stats-value" id="statPress">--</div></div>
                 <div><div class="stats-label">Wiatr</div><div class="stats-value" id="statWind">--</div></div>
               </div>
+              <div id="statNotesContainer" style="display: none; flex-direction: column; margin-top: 8px; border-top: 1px dashed rgba(148,163,184,0.3); padding-top: 8px;">
+                <div class="stats-label" style="margin-bottom: 4px;">Dziennik wędkarski</div>
+                <div class="stats-value" id="statNotes" style="font-weight: 400; font-style: italic; font-size: 12px; white-space: pre-wrap; color: #cbd5e1;"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -433,8 +437,8 @@
     let tickId = null;
     let pressureId = null;
 
-    let events = [];           // { t: minutesFromStart, type: 'rzut'|'branie'|'ryba' }
-    let pressureSamples = [];  // { t: minutesFromStart, p: hPa }
+    let events = [];           
+    let pressureSamples = [];  
     let lastWeather = null;
 
     let intervalExpiredNotified = false;
@@ -489,6 +493,8 @@
     const statTemp = document.getElementById("statTemp");
     const statPress = document.getElementById("statPress");
     const statWind = document.getElementById("statWind");
+    const statNotesContainer = document.getElementById("statNotesContainer");
+    const statNotes = document.getElementById("statNotes");
 
     // -------------------------------------------------------
     // UTILS
@@ -615,7 +621,6 @@
       btnStart.textContent = "⏸ Pauza";
       enableMainButtons(true);
 
-      // Pierwsza próbka ciśnienia natychmiast po starcie
       if (lastWeather && typeof lastWeather.press === "number") {
         pressureSamples.push({
           t: 0,
@@ -623,7 +628,6 @@
         });
       }
 
-      // GŁÓWNY TIMER
       if (!tickId) {
         tickId = setInterval(() => {
           if (!timersRunning) return;
@@ -645,7 +649,6 @@
         }, 1000);
       }
 
-      // TIMER CIŚNIENIA
       if (!pressureId) {
         pressureId = setInterval(() => {
           if (timersRunning && lastWeather && typeof lastWeather.press === "number") {
@@ -671,7 +674,7 @@
     }
 
     // -------------------------------------------------------
-    // EVENTS (RZUT / BRANIE / RYBA)
+    // EVENTS
     // -------------------------------------------------------
     function addEvent(type) {
       if (!timersRunning) return;
@@ -687,7 +690,6 @@
       intervalExpiredNotified = false;
       resetIntervalVisual();
     }
-
 
     // -------------------------------------------------------
     // MODALS
@@ -727,7 +729,7 @@
     });
 
     // -------------------------------------------------------
-    // HISTORY (LOCALSTORAGE)
+    // HISTORY
     // -------------------------------------------------------
     const STORAGE_KEY = "feeder_trener_pro_sessions";
 
@@ -843,7 +845,6 @@
       if (chartEvents) chartEvents.destroy();
       if (chartPressure) chartPressure.destroy();
 
-      // WYKRES ZDARZEŃ (NAPRAWIONE MIN: 0)
       chartEvents = new Chart(chartEventsCtx, {
         type: "scatter",
         data: {
@@ -872,7 +873,7 @@
           scales: {
             x: {
               type: "linear",
-              min: 0, // ZABEZPIECZENIE PRZED UJEMNĄ OSIĄ
+              min: 0,
               title: { display: true, text: "Czas (minuty)", color: "#9ca3af" },
               ticks: { color: "#9ca3af" },
               grid: { color: "rgba(55,65,81,0.6)" }
@@ -892,7 +893,6 @@
         }
       });
 
-      // WYKRES CIŚNIENIA (NAPRAWIONE MIN: 0)
       chartPressure = new Chart(chartPressureCtx, {
         type: "line",
         data: {
@@ -923,7 +923,7 @@
           scales: {
             x: {
               type: "linear",
-              min: 0, // ZABEZPIECZENIE PRZED UJEMNĄ OSIĄ
+              min: 0,
               title: { display: true, text: "Czas (minuty)", color: "#9ca3af" },
               ticks: { color: "#9ca3af" },
               grid: { color: "rgba(55,65,81,0.6)" }
@@ -954,6 +954,15 @@
         statTemp.textContent = "--";
         statPress.textContent = "--";
         statWind.textContent = "--";
+      }
+
+      // OBSŁUGA WYŚWIETLANIA NOTATEK
+      if (sess.diary && sess.diary.trim() !== "") {
+        statNotes.textContent = sess.diary;
+        statNotesContainer.style.display = "flex";
+      } else {
+        statNotesContainer.style.display = "none";
+        statNotes.textContent = "";
       }
     }
 
@@ -1078,8 +1087,6 @@
     // INIT
     // -------------------------------------------------------
     function init() {
-      // localStorage.removeItem("feeder_trener_pro_sessions"); // WYŁĄCZONE KASOWANIE HISTORII
-
       fishingTotalSeconds = FISHING_DEFAULT_HOURS * 3600;
       intervalTotalSeconds = INTERVAL_DEFAULT_MIN * 60;
 
