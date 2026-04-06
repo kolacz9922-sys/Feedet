@@ -603,29 +603,29 @@
       }
     }
 
-    // -------------------------------------------------------
-    // TIMERS
-    // -------------------------------------------------------
-    function updateTimers() {
-      elTimerFishing.textContent = formatHMS(fishingRemaining);
-      elTimerInterval.textContent = formatMS(intervalRemaining);
-    }
+   // -------------------------------------------------------
+// TIMERS
+// -------------------------------------------------------
+function updateTimers() {
+  elTimerFishing.textContent = formatHMS(fishingRemaining);
+  elTimerInterval.textContent = formatMS(intervalRemaining);
+}
 
-    function resetIntervalVisual() {
-      elIntervalLine.classList.remove("expired");
-      elTimerInterval.textContent = formatMS(intervalRemaining);
-    }
+function resetIntervalVisual() {
+  elIntervalLine.classList.remove("expired");
+  elTimerInterval.textContent = formatMS(intervalRemaining);
+}
 
-   function startTimers() {
+function startTimers() {
   if (timersRunning) return;
   timersRunning = true;
   btnStart.textContent = "⏸ Pauza";
   enableMainButtons(true);
 
-  // 🔥 DODANE — pierwsza próbka ciśnienia natychmiast po starcie
+  // 🔥 Pierwsza próbka ciśnienia natychmiast po starcie
   if (lastWeather && typeof lastWeather.press === "number") {
     pressureSamples.push({
-      t: 0, // zawsze 0 na starcie
+      t: 0,
       p: lastWeather.press
     });
   }
@@ -634,6 +634,7 @@
   if (!tickId) {
     tickId = setInterval(() => {
       if (!timersRunning) return;
+
       elapsedSeconds++;
       fishingRemaining = Math.max(0, fishingRemaining - 1);
       intervalRemaining = Math.max(0, intervalRemaining - 1);
@@ -646,6 +647,7 @@
           intervalExpiredNotified = true;
         }
       }
+
       updateTimers();
     }, 1000);
   }
@@ -664,18 +666,16 @@
   }
 }
 
+function pauseTimers() {
+  timersRunning = false;
+  btnStart.textContent = "▶ Start";
+  enableMainButtons(false);
+}
 
-
-    function pauseTimers() {
-      timersRunning = false;
-      btnStart.textContent = "▶ Start";
-      enableMainButtons(false);
-    }
-
-    function toggleStart() {
-      if (timersRunning) pauseTimers();
-      else startTimers();
-    }
+function toggleStart() {
+  if (timersRunning) pauseTimers();
+  else startTimers();
+}
 
     // -------------------------------------------------------
     // EVENTS (RZUT / BRANIE / RYBA)
