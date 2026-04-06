@@ -327,7 +327,12 @@
   <!-- BOTTOM NAV -->
   <div class="nav">
     <div class="nav-inner glass">
-      <div class="btn-nav primary" id="btnStart">▶ Start</div>
+      <div class="btn-nav primary btn-start loading" id="btnStart" disabled>
+  <span class="loader"></span>
+  <span class="loader-text">Ładowanie pogody…</span>
+  <span class="start-text">▶ Start</span>
+</div>
+
       <div class="btn-nav" id="btnCharts">📊 Wykres</div>
       <div class="btn-nav" id="btnHistory">📁 Historia</div>
       <div class="btn-nav" id="btnSave">💾 Zapisz</div>
