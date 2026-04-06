@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Feeder Trener PRO MAX ULTRA</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#020617" />
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+  <style>
+    /* -------------------------------------------------------
+       ROOT & GLOBAL
+    ------------------------------------------------------- */
+    :root {
+      --glass: rgba(15, 23, 42, 0.5);
+      --border: rgba(148, 163, 184, 0.3);
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --green: #4ade80;
+      --yellow: #facc15;
+      --red: #f87171;
+      --blue: #38bdf8;
+      --radius: 20px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
+    
+    body {
+      color: var(--text);
+      font-family: system-ui, sans-serif;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding-bottom: 80px;
+      overflow-x: hidden;
+    }
+
+    /* MOTION UI: PARALLAX BG */
+    .parallax-bg {
+      position: fixed;
+      inset: -50px; /* Zapas na ruch */
+      z-index: -1;
+      background:
+        radial-gradient(circle at 0% 0%, rgba(56,189,248,0.18), transparent 55%),
+        radial-gradient(circle at 100% 100%, rgba(34,197,94,0.16), transparent 55%),
+        linear-gradient(135deg, #020617 0%, #0f172a 100%);
+      transition: transform 0.15s ease-out;
+      will-change: transform;
+    }
+    
+    .app {
+      flex: 1; 
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      max-width: 600px;
+      z-index: 1;
+    }
+
+    .motion-tilt {
+      transition: transform 0.15s ease-out;
+      will-change: transform;
+    }
+
+    /* -------------------------------------------------------
+       TOP BAR & COMPASS 3D
+    ------------------------------------------------------- */
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      padding: 16px 16px 12px 16px;
+      align-items: center;
+      background: rgba(15,23,42,0.6);
+      backdrop-filter: blur(24px);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      border-radius: 0 0 var(--radius) var(--radius);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .weather-main { font-size: 14px; font-weight: 700; }
+    .weather-sub { font-size: 11px; color: var(--muted); }
+    .clock { font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--blue); text-shadow: 0 0 10px rgba(56,189,248,0.5);}
+
+    .btn-icon {
+      width: 36px; height: 36px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: linear-gradient(145deg, rgba(30,41,59,0.8), rgba(15,23,42,0.9));
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .wind-compass {
+      width: 38px; height: 38px;
+      border-radius: 999px;
+      border: 1px solid rgba(56,189,248,0.35);
+      background: radial-gradient(circle at 50% 50%, rgba(56,189,248,0.15), rgba(15,23,42,0.95)), linear-gradient(145deg, #0f172a, #020617);
+      box-shadow: 0 0 12px rgba(56,189,248,0.25), inset 0 0 8px rgba(56,189,248,0.15), 0 8px 18px rgba(0,0,0,0.6);
+      display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden;
+    }
+    .wind-compass::after {
+      content: ""; position: absolute; inset: 0; border-radius: inherit;
+      background: radial-gradient(circle at 30% 0%, rgba(255,255,255,0.12), transparent 60%);
+      pointer-events: none;
+    }
+    .wind-needle {
+      width: 3px; height: 20px;
+      border-radius: 999px;
+      background: linear-gradient(to top, #f87171, #facc15);
+      box-shadow: 0 0 8px rgba(250,204,21,0.6);
+      transform-origin: 50% 85%;
+      transition: transform 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+
+    /* -------------------------------------------------------
+       ULTRA HUD
+    ------------------------------------------------------- */
+    .hud {
+      position: fixed;
+      top: 75px; left: 0; right: 0;
+      padding: 8px;
+      display: flex; justify-content: center;
+      pointer-events: none; z-index: 10;
+    }
+    .hud-row { display: flex; gap: 8px; }
+    .hud-box {
+      padding: 6px 12px; font-size: 11px; font-weight: 800; border-radius: 8px;
+      background: rgba(0,255,255,0.08); border: 1px solid rgba(0,255,255,0.35);
+      color: #00f5ff; text-shadow: 0 0 6px rgba(0,255,255,0.6);
+      box-shadow: 0 0 12px rgba(0,255,255,0.25), inset 0 0 8px rgba(0,255,255,0.15);
+      backdrop-filter: blur(8px);
+    }
+
+    /* -------------------------------------------------------
+       TIMERS
+    ------------------------------------------------------- */
+    .timers { margin: 45px 16px 8px 16px; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+    .timer-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 16px; border-radius: 16px;
+      background: linear-gradient(145deg, rgba(30,41,59,0.6), rgba(15,23,42,0.8));
+      border: 1px solid rgba(255,255,255,0.05);
+      box-shadow: inset 0 2px 10px rgba(0,0,0,0.2), 0 10px 20px rgba(0,0,0,0.4);
+    }
+    .timer-label { font-size: 10px; text-transform: uppercase; color: var(--muted); font-weight: 700; letter-spacing: 1px; }
+    .timer-value { font-size: 26px; font-weight: 900; font-variant-numeric: tabular-nums; text-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+    .timer-main .timer-value { color: var(--blue); }
+    .timer-interval .timer-value { color: var(--green); }
+    .timer-interval.expired .timer-value { color: var(--red); text-shadow: 0 0 15px rgba(239,68,68,0.6); }
+
+    /* -------------------------------------------------------
+       MAIN BUTTONS 3D
+    ------------------------------------------------------- */
+    .actions { flex: 1; display: flex; flex-direction: column; gap: 16px; padding: 10px 16px; }
+    .btn-main {
+      position: relative; flex: 1; width: 100%; min-height: 90px; border-radius: 20px;
+      border: 1px solid rgba(148,163,184,0.45);
+      background: radial-gradient(circle at 30% 0%, rgba(255,255,255,0.12), transparent 55%), linear-gradient(145deg, #0f172a, #020617);
+      box-shadow: 0 18px 35px rgba(0,0,0,0.7), inset 0 0 12px rgba(255,255,255,0.05), 0 0 0 1px rgba(255,255,255,0.05);
+      display: flex; justify-content: center; align-items: center;
+      font-size: 28px; font-weight: 800; cursor: pointer; text-transform: uppercase; letter-spacing: 2px;
+      transform: translateY(0);
+      transition: transform 0.08s ease-out, box-shadow 0.08s ease-out, filter 0.2s;
+    }
+    .btn-main:active:not(.disabled) {
+      transform: translateY(4px);
+      box-shadow: 0 8px 15px rgba(0,0,0,0.6), inset 0 0 8px rgba(255,255,255,0.03);
+    }
+    .btn-main.disabled { opacity: 0.3; pointer-events: none; filter: grayscale(100%); }
+    
+    .btn-main.green { color: #4ade80; border-color: rgba(74,222,128,0.7); box-shadow: 0 18px 35px rgba(0,0,0,0.7), 0 0 12px rgba(74,222,128,0.25); }
+    .btn-main.yellow { color: #facc15; border-color: rgba(250,204,21,0.7); box-shadow: 0 18px 35px rgba(0,0,0,0.7), 0 0 12px rgba(250,204,21,0.25); }
+    .btn-main.red { color: #f87171; border-color: rgba(248,113,113,0.7); box-shadow: 0 18px 35px rgba(0,0,0,0.7), 0 0 12px rgba(248,113,113,0.25); }
+
+    /* -------------------------------------------------------
+       ANIMACJE FLASH & PULSE
+    ------------------------------------------------------- */
+    @keyframes flashGreen { 0% { background-color: rgba(34,197,94,0.25); } 100% { background-color: transparent; } }
+    @keyframes flashYellow { 0% { background-color: rgba(250,204,21,0.25); } 100% { background-color: transparent; } }
+    @keyframes flashRed { 0% { background-color: rgba(248,113,113,0.25); } 100% { background-color: transparent; } }
+    @keyframes pulseBtn { 0% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.05); filter: brightness(1.5); } 100% { transform: scale(1); filter: brightness(1); } }
+
+    .flash-rzut .parallax-bg { animation: flashGreen 220ms ease-out; }
+    .flash-branie .parallax-bg { animation: flashYellow 220ms ease-out; }
+    .flash-ryba .parallax-bg { animation: flashRed 220ms ease-out; }
+    .btn-pulse { animation: pulseBtn 220ms ease-out; }
+
+    /* -------------------------------------------------------
+       BOTTOM NAV
+    ------------------------------------------------------- */
+    .nav {
+      position: fixed; bottom: 0; left: 0; right: 0; padding: 12px;
+      display: flex; justify-content: center; pointer-events: none; z-index: 50;
+    }
+    .nav-inner {
+      pointer-events: auto; width: 100%; max-width: 480px; display: flex; gap: 8px; padding: 8px;
+      border-radius: 999px; background: rgba(15,23,42,0.85); border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(20px); box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+    }
+    .btn-nav {
+      flex: 1; padding: 12px 4px; border-radius: 999px; background: transparent; border: none;
+      font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--muted);
+      display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.2s;
+    }
+    .btn-nav.primary {
+      background: linear-gradient(135deg, rgba(56,189,248,0.4), rgba(56,189,248,0.1));
+      border: 1px solid rgba(56,189,248,0.6); color: #fff; box-shadow: 0 0 15px rgba(56,189,248,0.2);
+    }
+    .btn-nav.primary.loading { opacity: 0.5; pointer-events: none; background: rgba(30,41,59,0.8); box-shadow: none; border-color: rgba(255,255,255,0.1); }
+    .btn-nav.primary .loader-text { display: none; } .btn-nav.primary .start-text { display: block; }
+    .btn-nav.primary.loading .loader-text { display: block; color: var(--yellow); } .btn-nav.primary.loading .start-text { display: none; }
+
+    /* -------------------------------------------------------
+       MODALS & NEON CHARTS
+    ------------------------------------------------------- */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(15px);
+      display: none; align-items: center; justify-content: center; z-index: 100;
+    }
+    .modal-backdrop.active { display: flex; animation: modalFade 0.2s ease-out; }
+    @keyframes modalFade { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+    
+    .modal {
+      width: 90%; max-width: 480px; background: linear-gradient(145deg, #1e293b, #0f172a);
+      border-radius: 28px; border: 1px solid rgba(255,255,255,0.1); padding: 20px;
+      display: flex; flex-direction: column; gap: 16px; max-height: 85vh; overflow: hidden;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+    }
+    .modal-header { display: flex; justify-content: space-between; font-size: 18px; font-weight: 800; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; }
+    .modal-body { overflow-y: auto; padding-right: 4px; }
+
+    .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+    .form-group label { font-size: 10px; color: var(--muted); text-transform: uppercase; font-weight: 700; }
+    .form-input, .form-textarea { background: rgba(2,6,23,0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 14px; color: white; font-size: 14px; }
+    .form-input:focus, .form-textarea:focus { outline: none; border-color: var(--blue); background: rgba(2,6,23,0.9); }
+    .btn-primary { padding: 14px; border-radius: 16px; background: linear-gradient(135deg, var(--blue), #2563eb); border: none; font-weight: 800; color: white; cursor: pointer; box-shadow: 0 10px 20px rgba(56,189,248,0.3); }
+
+    .charts { display: flex; flex-direction: column; gap: 16px; }
+    
+    /* RADAR NEON CHARTS */
+    .chart-box {
+      padding: 12px; border-radius: 20px;
+      background: radial-gradient(circle at 50% 50%, rgba(56,189,248,0.08), rgba(15,23,42,0.95)), linear-gradient(145deg, rgba(15,23,42,0.95), rgba(2,6,23,0.95));
+      border: 1px solid rgba(56,189,248,0.25);
+      box-shadow: 0 0 18px rgba(56,189,248,0.15), inset 0 0 12px rgba(56,189,248,0.05);
+    }
+    .chart-box canvas { filter: drop-shadow(0 0 6px rgba(56,189,248,0.35)) drop-shadow(0 0 12px rgba(56,189,248,0.25)); }
+    .chart-title { font-size: 11px; color: var(--blue); margin-bottom: 8px; text-transform: uppercase; font-weight: 800; text-shadow: 0 0 6px rgba(56,189,248,0.4); }
+    canvas { width: 100% !important; height: 180px !important; }
+
+    .stats { padding: 16px; border-radius: 20px; background: rgba(30,41,59,0.4); border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; gap: 12px; }
+    .stats-row { display: flex; justify-content: space-between; }
+    .stats-label { font-size: 10px; color: var(--muted); text-transform: uppercase; font-weight: 700;}
+    .stats-value { font-size: 15px; font-weight: 800; color: white;}
+
+    /* -------------------------------------------------------
+       NIGHT FISHING MODE (CSS)
+    ------------------------------------------------------- */
+    body.night-mode .parallax-bg {
+      background: radial-gradient(circle at 50% 0%, rgba(0,255,255,0.08), rgba(0,0,0,1)), linear-gradient(180deg, #000814, #000);
+    }
+    body.night-mode .btn-main {
+      background: radial-gradient(circle at 30% 0%, rgba(0,255,255,0.12), transparent 60%), linear-gradient(145deg, #000814, #000);
+      border-color: rgba(0,255,255,0.35);
+      box-shadow: 0 0 18px rgba(0,255,255,0.25), inset 0 0 12px rgba(0,255,255,0.05);
+    }
+    body.night-mode .btn-main.green { color: #00ffbf; }
+    body.night-mode .btn-main.yellow { color: #ffe066; }
+    body.night-mode .btn-main.red { color: #ff6b6b; }
+    body.night-mode .topbar { background: rgba(0,0,0,0.8); text-shadow: 0 0 6px rgba(0,255,255,0.4); border-color: rgba(0,255,255,0.3); }
+    body.night-mode canvas { filter: drop-shadow(0 0 8px rgba(0,255,255,0.35)) drop-shadow(0 0 16px rgba(0,255,255,0.25)); }
+    body.night-mode .wind-compass { border-color: rgba(0,255,255,0.35); background: radial-gradient(circle at 50% 50%, rgba(0,255,255,0.15), rgba(0,0,0,0.95)); }
+  </style>
+</head>
+
+<body>
+  <div class="parallax-bg" id="parallaxBg"></div>
+
+  <div id="hudOverlay" class="hud motion-tilt">
+    <div class="hud-row">
+      <div class="hud-box" id="hudPressure">-- hPa</div>
+      <div class="hud-box" id="hudWind">-- km/h</div>
+      <div class="hud-box" id="hudEvents">0/0/0</div>
+    </div>
+  </div>
+
+  <div class="app motion-tilt" id="appBody">
+    <div class="topbar">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <div class="wind-compass"><div class="wind-needle" id="windNeedle"></div></div>
+        <div>
+          <div class="weather-main" id="weatherMain">--°C</div>
+          <div class="weather-sub" id="weatherSub">Pobieranie API...</div>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <div class="clock" id="clockTime">--:--:--</div>
+        <div class="btn-icon" id="btnSettings">⚙️</div>
+        <div class="btn-icon" id="btnFullscreen">🔲</div>
+      </div>
+    </div>
+
+    <div class="timers">
+      <div class="timer-row timer-main">
+        <div><div class="timer-label">Czas łowienia</div></div>
+        <div class="timer-value" id="timerFishing">04:00:00</div>
+      </div>
+      <div class="timer-row timer-interval" id="intervalLine">
+        <div><div class="timer-label">Zestaw w wodzie</div></div>
+        <div class="timer-value" id="timerInterval">00:03:00</div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <div class="btn-main green disabled" id="btnRzut">🔄 Rzut</div>
+      <div class="btn-main yellow disabled" id="btnBranie">⚠️ Branie</div>
+      <div class="btn-main red disabled" id="btnRyba">🐟 Ryba</div>
+    </div>
+  </div>
+
+  <div class="nav">
+    <div class="nav-inner motion-tilt">
+      <div class="btn-nav primary loading" id="btnStart" disabled>
+        <span class="loader-text">⏳ Radar...</span>
+        <span class="start-text">▶ Start</span>
+      </div>
+      <div class="btn-nav" id="btnCharts">📊 Analiza</div>
+      <div class="btn-nav" id="btnHistory">📁 Baza</div>
+      <div class="btn-nav" id="btnSave">💾 Zapisz</div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modalSettings">
+    <div class="modal">
+      <div class="modal-header">
+        <span>⚙️ Ustawienia ULTRA</span>
+        <span class="modal-close" data-close="modalSettings" style="cursor:pointer; color:var(--muted)">✕</span>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Czas łowienia (h)</label>
+          <input type="number" id="inputFishingHours" class="form-input" value="4" min="1" max="24">
+        </div>
+        <div class="form-group">
+          <label>Interwał (min)</label>
+          <input type="number" id="inputIntervalMinutes" class="form-input" value="3" min="1" max="180">
+        </div>
+        <button class="btn-primary" id="btnForceNight" style="width:100%; margin-bottom:8px; background:linear-gradient(135deg, #0f172a, #020617); border: 1px solid #38bdf8;">🌙 Wymuś tryb nocny</button>
+        <button class="btn-primary" id="btnSaveSettings" style="width:100%;">Zastosuj Ustawienia</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modalSave">
+    <div class="modal">
+      <div class="modal-header">
+        <span>💾 Zapisz do bazy</span>
+        <span class="modal-close" data-close="modalSave" style="cursor:pointer; color:var(--muted)">✕</span>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Nazwa łowiska / Tura</label>
+          <input type="text" id="inputSpot" class="form-input" placeholder="Wpisz nazwę...">
+        </div>
+        <div class="form-group">
+          <label>Dziennik Wędkarski</label>
+          <textarea id="inputDiary" class="form-textarea" placeholder="Zanęty, taktyka, wnioski..."></textarea>
+        </div>
+        <button class="btn-primary" id="btnSaveConfirm" style="width:100%; margin-top:8px;">Zapisz Raport</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modalHistory">
+    <div class="modal">
+      <div class="modal-header">
+        <span>📁 Archiwum Raportów</span>
+        <span class="modal-close" data-close="modalHistory" style="cursor:pointer; color:var(--muted)">✕</span>
+      </div>
+      <div class="modal-body">
+        <div id="historyList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modalCharts">
+    <div class="modal">
+      <div class="modal-header">
+        <span style="color:var(--blue)">📊 Sonar & Analiza</span>
+        <span class="modal-close" data-close="modalCharts" style="cursor:pointer; color:var(--muted)">✕</span>
+      </div>
+      <div class="modal-body">
+        <div id="chartsExportArea" style="background:#0f172a; padding:8px; border-radius:20px;">
+          
+          <div id="aiHotMoments" class="glass" style="padding:12px; margin-bottom:12px; background: rgba(255,0,128,0.1); border: 1px solid rgba(255,0,128,0.4);">
+            <div style="font-weight:800; font-size:12px; color:#ff0080; text-transform:uppercase; margin-bottom:4px;">🎯 AI Hot Moments</div>
+            <div id="aiHotText" style="font-size:13px; color:#e2e8f0; font-weight: 500;">Brak danych do analizy.</div>
+          </div>
+
+          <div class="charts">
+            <div class="chart-box">
+              <div class="chart-title">Zdarzenia (Timeline)</div>
+              <canvas id="chartEvents"></canvas>
+            </div>
+            <div class="chart-box">
+              <div class="chart-title">Ciśnienie & Hot Spots</div>
+              <canvas id="chartPressure"></canvas>
+            </div>
+            
+            <div class="stats">
+              <div class="stats-row">
+                <div><div class="stats-label">Rzuty</div><div class="stats-value" style="color:var(--green)" id="statRzuty">0</div></div>
+                <div><div class="stats-label">Brania</div><div class="stats-value" style="color:var(--yellow)" id="statBrania">0</div></div>
+                <div><div class="stats-label">Ryby</div><div class="stats-value" style="color:var(--red)" id="statRyby">0</div></div>
+              </div>
+              <div class="stats-row">
+                <div><div class="stats-label">Temp</div><div class="stats-value" id="statTemp">--</div></div>
+                <div><div class="stats-label">Ciśnienie</div><div class="stats-value" id="statPress">--</div></div>
+                <div><div class="stats-label">Wiatr</div><div class="stats-value" id="statWind">--</div></div>
+              </div>
+              <div id="statNotesContainer" style="display: none; flex-direction: column; margin-top: 12px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 12px;">
+                <div class="stats-label" style="margin-bottom: 6px; color:var(--blue)">Dziennik Pokładowy</div>
+                <div class="stats-value" id="statNotes" style="font-weight: 500; font-style: italic; font-size: 13px; white-space: pre-wrap; color: #cbd5e1;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button class="btn-primary" id="btnExport" style="margin-top:16px; width:100%">📷 Pobierz Raport (JPG)</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // -------------------------------------------------------
+    // CONFIG & STATE
+    // -------------------------------------------------------
+    const FISHING_DEFAULT_HOURS = 4;
+    const INTERVAL_DEFAULT_MIN = 3;
+
+    let fishingTotalSeconds = FISHING_DEFAULT_HOURS * 3600;
+    let intervalTotalSeconds = INTERVAL_DEFAULT_MIN * 60;
+
+    let fishingRemaining = fishingTotalSeconds;
+    let intervalRemaining = intervalTotalSeconds;
+    let elapsedSeconds = 0;
+
+    let timersRunning = false;
+    let tickId = null;
+    let pressureId = null;
+
+    let events = [];           
+    let pressureSamples = [];  
+    let lastWeather = null;
+
+    let intervalExpiredNotified = false;
+    let audioCtx = null;
+
+    let chartEvents = null;
+    let chartPressure = null;
+
+    // -------------------------------------------------------
+    // DOM
+    // -------------------------------------------------------
+    const appBody = document.getElementById("appBody");
+    const elWeatherMain = document.getElementById("weatherMain");
+    const elWeatherSub = document.getElementById("weatherSub");
+    const elClock = document.getElementById("clockTime");
+    const elWindNeedle = document.getElementById("windNeedle");
+    
+    const hudPressure = document.getElementById("hudPressure");
+    const hudWind = document.getElementById("hudWind");
+    const hudEvents = document.getElementById("hudEvents");
+
+    const elTimerFishing = document.getElementById("timerFishing");
+    const elTimerInterval = document.getElementById("timerInterval");
+    const elIntervalLine = document.getElementById("intervalLine");
+
+    const btnRzut = document.getElementById("btnRzut");
+    const btnBranie = document.getElementById("btnBranie");
+    const btnRyba = document.getElementById("btnRyba");
+
+    const btnStart = document.getElementById("btnStart");
+    const btnCharts = document.getElementById("btnCharts");
+    const btnHistory = document.getElementById("btnHistory");
+    const btnSave = document.getElementById("btnSave");
+    const btnSettings = document.getElementById("btnSettings");
+    const btnFullscreen = document.getElementById("btnFullscreen");
+    const btnExport = document.getElementById("btnExport");
+
+    const modalSettings = document.getElementById("modalSettings");
+    const modalSave = document.getElementById("modalSave");
+    const modalHistory = document.getElementById("modalHistory");
+    const modalCharts = document.getElementById("modalCharts");
+
+    const inputFishingHours = document.getElementById("inputFishingHours");
+    const inputIntervalMinutes = document.getElementById("inputIntervalMinutes");
+    const btnSaveSettings = document.getElementById("btnSaveSettings");
+    const btnForceNight = document.getElementById("btnForceNight");
+
+    const inputSpot = document.getElementById("inputSpot");
+    const inputDiary = document.getElementById("inputDiary");
+    const btnSaveConfirm = document.getElementById("btnSaveConfirm");
+    const historyList = document.getElementById("historyList");
+
+    const chartEventsCtx = document.getElementById("chartEvents").getContext("2d");
+    const chartPressureCtx = document.getElementById("chartPressure").getContext("2d");
+
+    const statRzuty = document.getElementById("statRzuty");
+    const statBrania = document.getElementById("statBrania");
+    const statRyby = document.getElementById("statRyby");
+    const statTemp = document.getElementById("statTemp");
+    const statPress = document.getElementById("statPress");
+    const statWind = document.getElementById("statWind");
+    const statNotesContainer = document.getElementById("statNotesContainer");
+    const statNotes = document.getElementById("statNotes");
+    const aiHotText = document.getElementById("aiHotText");
+
+    // -------------------------------------------------------
+    // UTILS
+    // -------------------------------------------------------
+    const pad = n => (n < 10 ? "0" + n : "" + n);
+
+    function formatHMS(sec) {
+      const s = Math.max(0, Math.floor(sec));
+      const h = Math.floor(s / 3600);
+      const m = Math.floor((s % 3600) / 60);
+      const ss = s % 60;
+      return `${pad(h)}:${pad(m)}:${pad(ss)}`;
+    }
+
+    function formatMS(sec) {
+      const s = Math.max(0, Math.floor(sec));
+      const m = Math.floor(s / 60);
+      const ss = s % 60;
+      return `00:${pad(m)}:${pad(ss)}`;
+    }
+
+    const minutesFromStart = () => Math.floor(elapsedSeconds / 60);
+
+    function enableMainButtons(on) {
+      [btnRzut, btnBranie, btnRyba].forEach(b => {
+        if (on) b.classList.remove("disabled");
+        else b.classList.add("disabled");
+      });
+    }
+
+    function vibrate(pattern) { if (navigator.vibrate) navigator.vibrate(pattern); }
+
+    function beep(ms = 120, freq = 880, vol = 0.2) {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const ctx = audioCtx;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sine"; osc.frequency.value = freq; gain.gain.value = vol;
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.start(); setTimeout(() => osc.stop(), ms);
+      } catch {}
+    }
+
+    // -------------------------------------------------------
+    // MOTION UI & NIGHT MODE
+    // -------------------------------------------------------
+    function initMotionUI() {
+      const bg = document.getElementById("parallaxBg");
+      const tiltEls = document.querySelectorAll(".motion-tilt");
+
+      window.addEventListener("deviceorientation", e => {
+        const x = e.gamma || 0; const y = e.beta || 0;
+        bg.style.transform = `translate(${x * 0.4}px, ${y * 0.2}px)`;
+        tiltEls.forEach(el => el.style.transform = `translate(${x * 0.2}px, ${y * 0.1}px)`);
+      });
+
+      window.addEventListener("mousemove", e => {
+        const x = (e.clientX / window.innerWidth - 0.5) * 20;
+        const y = (e.clientY / window.innerHeight - 0.5) * 10;
+        bg.style.transform = `translate(${x}px, ${y}px)`;
+        tiltEls.forEach(el => el.style.transform = `translate(${x * 0.4}px, ${y * 0.2}px)`);
+      });
+    }
+
+    function applyNightFishingMode() {
+      const hour = new Date().getHours();
+      if (hour >= 21 || hour < 5) document.body.classList.add("night-mode");
+      else document.body.classList.remove("night-mode");
+    }
+
+    btnForceNight.addEventListener("click", () => {
+      document.body.classList.toggle("night-mode");
+    });
+
+    // -------------------------------------------------------
+    // HUD & AI HOT MOMENTS
+    // -------------------------------------------------------
+    function updateHUD() {
+      if (lastWeather) {
+        hudPressure.textContent = `${lastWeather.press.toFixed(0)} hPa`;
+        hudWind.textContent = `${lastWeather.wind.toFixed(1)} km/h`;
+      }
+      const rz = events.filter(e => e.type === "rzut").length;
+      const br = events.filter(e => e.type === "branie").length;
+      const ry = events.filter(e => e.type === "ryba").length;
+      hudEvents.textContent = `${rz}/${br}/${ry}`;
+    }
+
+    function analyzeHotMoments(evts, press) {
+      const windowSize = 10; 
+      const scores = [];
+      const currentMin = minutesFromStart();
+
+      for (let t = 0; t <= currentMin; t++) {
+        const from = t - windowSize;
+        const ev = evts.filter(e => e.t >= from && e.t <= t);
+        const ps = press.filter(p => p.t >= from && p.t <= t);
+
+        let score = 0;
+        score += ev.filter(e => e.type === "branie").length * 3;
+        score += ev.filter(e => e.type === "ryba").length * 5;
+        score += ev.filter(e => e.type === "rzut").length * 0.5;
+
+        if (ps.length >= 2) {
+          const delta = ps[ps.length - 1].p - ps[0].p;
+          if (delta > 0.5) score += 2; 
+          if (delta < -0.5) score -= 1;
+        }
+        scores.push({ t, score });
+      }
+      return scores;
+    }
+
+    function updateAIHotPanel() {
+      const hot = analyzeHotMoments(events, pressureSamples);
+      if(!hot.length) return;
+      const best = hot.sort((a,b) => b.score - a.score)[0];
+
+      if (!best || best.score < 3) {
+        aiHotText.textContent = "Brak mocnych wzorców uderzeniowych.";
+        return;
+      }
+      aiHotText.innerHTML = `🔥 Najlepsze okno: <strong>${best.t.toFixed(0)} min</strong> sesji <br><span style="font-size:10px; color:#cbd5e1">Score radaru: ${best.score.toFixed(1)}</span>`;
+    }
+
+    // -------------------------------------------------------
+    // FLASH FX
+    // -------------------------------------------------------
+    function triggerEventFX(type) {
+      let btn, clsApp;
+      if (type === 'rzut') { btn = btnRzut; clsApp = 'flash-rzut'; }
+      if (type === 'branie') { btn = btnBranie; clsApp = 'flash-branie'; }
+      if (type === 'ryba') { btn = btnRyba; clsApp = 'flash-ryba'; }
+      
+      document.body.classList.add(clsApp);
+      btn.classList.add('btn-pulse');
+      
+      setTimeout(() => {
+        document.body.classList.remove(clsApp);
+        btn.classList.remove('btn-pulse');
+      }, 250);
+    }
+
+    // -------------------------------------------------------
+    // CLOCK & WEATHER
+    // -------------------------------------------------------
+    function initClock() {
+      function tick() { elClock.textContent = `${pad(new Date().getHours())}:${pad(new Date().getMinutes())}:${pad(new Date().getSeconds())}`; }
+      tick(); setInterval(tick, 1000);
+    }
+
+    function unlockStartButton() {
+      btnStart.classList.remove("loading");
+      btnStart.classList.add("ready"); 
+      btnStart.removeAttribute("disabled");
+      updateHUD();
+    }
+
+    function windDirText(deg) {
+      if (deg == null || isNaN(deg)) return "--";
+      const dirs = ["N","NE","E","SE","S","SW","W","NW"];
+      return dirs[Math.round(deg / 45) % 8];
+    }
+
+    function fetchWeather(lat, lon) {
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,pressure_msl,wind_speed_10m,wind_direction_10m&timezone=auto`;
+      fetch(url)
+        .then(r => r.json())
+        .then(d => {
+          if (!d || !d.current) { unlockStartButton(); return; }
+          const c = d.current;
+          const temp = c.temperature_2m;
+          const press = c.pressure_msl;
+          const windKmh = c.wind_speed_10m * 3.6;
+          const dir = windDirText(c.wind_direction_10m);
+
+          elWeatherMain.textContent = `${temp.toFixed(1)}°C`;
+          elWeatherSub.textContent = `Ciśn: ${press.toFixed(0)} hPa · Wiatr: ${windKmh.toFixed(1)} km/h ${dir}`;
+          
+          if (c.wind_direction_10m != null) elWindNeedle.style.transform = `rotate(${c.wind_direction_10m}deg)`;
+
+          lastWeather = { temp, press, wind: windKmh, dir };
+          unlockStartButton();
+        })
+        .catch(() => { unlockStartButton(); });
+    }
+
+    function initWeather() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          pos => fetchWeather(pos.coords.latitude, pos.coords.longitude),
+          () => fetchWeather(50.0647, 19.9450),
+          { timeout: 5000, maximumAge: 600000 }
+        );
+      } else { fetchWeather(50.0647, 19.9450); }
+      setTimeout(unlockStartButton, 4000);
+    }
+
+    // -------------------------------------------------------
+    // TIMERS LOGIC
+    // -------------------------------------------------------
+    function updateTimers() {
+      elTimerFishing.textContent = formatHMS(fishingRemaining);
+      elTimerInterval.textContent = formatMS(intervalRemaining);
+    }
+
+    function resetIntervalVisual() {
+      elIntervalLine.classList.remove("expired");
+      elTimerInterval.textContent = formatMS(intervalRemaining);
+    }
+
+    function startTimers() {
+      if (timersRunning) return;
+      timersRunning = true;
+      btnStart.querySelector('.start-text').textContent = "⏸ Pauza";
+      enableMainButtons(true);
+
+      if (lastWeather && typeof lastWeather.press === "number") {
+        pressureSamples.push({ t: minutesFromStart(), p: lastWeather.press });
+      }
+
+      if (!tickId) {
+        tickId = setInterval(() => {
+          if (!timersRunning) return;
+          elapsedSeconds++;
+          fishingRemaining = Math.max(0, fishingRemaining - 1);
+          intervalRemaining = Math.max(0, intervalRemaining - 1);
+
+          if (intervalRemaining === 0) {
+            elIntervalLine.classList.add("expired");
+            if (!intervalExpiredNotified) { beep(200, 520, 0.25); vibrate([80, 60, 80]); intervalExpiredNotified = true; }
+          }
+          updateTimers();
+        }, 1000);
+      }
+
+      if (!pressureId) {
+        pressureId = setInterval(() => {
+          if (timersRunning && lastWeather && typeof lastWeather.press === "number") {
+            pressureSamples.push({ t: minutesFromStart(), p: lastWeather.press });
+          }
+          if (navigator.geolocation) {
+              navigator.geolocation.getCurrentPosition(pos => fetchWeather(pos.coords.latitude, pos.coords.longitude), () => fetchWeather(50.0647, 19.9450));
+          } else { fetchWeather(50.0647, 19.9450); }
+        }, 15 * 60 * 1000);
+      }
+    }
+
+    function pauseTimers() {
+      timersRunning = false;
+      btnStart.querySelector('.start-text').textContent = "▶ Start";
+      enableMainButtons(false);
+    }
+
+    function toggleStart() {
+      if (btnStart.hasAttribute('disabled')) return; 
+      if (timersRunning) pauseTimers(); else startTimers();
+    }
+
+    function addEvent(type) {
+      if (!timersRunning) return;
+
+      const t = minutesFromStart();
+      events.push({ t, type });
+      triggerEventFX(type);
+      updateHUD();
+      updateAIHotPanel();
+
+      intervalRemaining = intervalTotalSeconds;
+      intervalExpiredNotified = false;
+      resetIntervalVisual();
+    }
+
+    // -------------------------------------------------------
+    // MODALS & NAVIGATION
+    // -------------------------------------------------------
+    function openModal(id) { document.getElementById(id).classList.add("active"); }
+    function closeModal(id) { document.getElementById(id).classList.remove("active"); }
+
+    document.querySelectorAll(".modal-close").forEach(el => { el.addEventListener("click", () => closeModal(el.dataset.close)); });
+    [modalSettings, modalSave, modalHistory, modalCharts].forEach(m => { m.addEventListener("click", e => { if (e.target === m) m.classList.remove("active"); }); });
+
+    btnSaveSettings.addEventListener("click", () => {
+      const h = parseInt(inputFishingHours.value, 10); const m = parseInt(inputIntervalMinutes.value, 10);
+      if (!isNaN(h) && h > 0 && h <= 24) fishingTotalSeconds = h * 3600;
+      if (!isNaN(m) && m > 0 && m <= 180) intervalTotalSeconds = m * 60;
+
+      fishingRemaining = fishingTotalSeconds; intervalRemaining = intervalTotalSeconds;
+      intervalExpiredNotified = false; resetIntervalVisual(); updateTimers(); closeModal("modalSettings");
+    });
+
+    // -------------------------------------------------------
+    // HISTORY & SAVING
+    // -------------------------------------------------------
+    const STORAGE_KEY = "feeder_trener_ultra";
+
+    function loadSessions() { try { const arr = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); return Array.isArray(arr) ? arr : []; } catch { return []; } }
+    function saveSessions(list) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); } catch {} }
+    function currentSnapshot() { return { id: Date.now(), createdAt: new Date().toISOString(), spot: inputSpot.value || "Bieżąca sesja", diary: inputDiary.value || "", events: events.slice(), pressureSamples: pressureSamples.slice(), weatherEnd: lastWeather ? { ...lastWeather } : null }; }
+
+    function refreshHistory() {
+      const sessions = loadSessions().sort((a, b) => b.id - a.id);
+      historyList.innerHTML = "";
+      if (!sessions.length) { historyList.innerHTML = "<div style='color:var(--muted); text-align:center; padding: 20px;'>Brak zapisów w bazie radaru.</div>"; return; }
+      sessions.forEach(sess => {
+        const row = document.createElement("div");
+        row.style.padding = "12px 16px"; row.style.marginBottom = "10px"; row.style.background = "rgba(30,41,59,0.5)"; row.style.borderRadius = "16px"; row.style.border = "1px solid rgba(255,255,255,0.05)";
+        
+        const title = document.createElement("div"); title.textContent = sess.spot; title.style.fontWeight = "700"; title.style.color = "white";
+        const date = document.createElement("div"); date.textContent = new Date(sess.createdAt).toLocaleString("pl-PL"); date.style.fontSize = "11px"; date.style.color = "var(--muted)"; date.style.marginBottom = "10px";
+
+        const btns = document.createElement("div"); btns.style.display = "flex"; btns.style.gap = "8px";
+
+        const open = document.createElement("button"); open.textContent = "📊 Otwórz analizę"; open.className = "btn-primary"; open.style.flex = "1"; open.style.padding = "8px"; open.style.fontSize = "11px";
+        open.addEventListener("click", () => { closeModal("modalHistory"); showChartsForSession(sess); });
+
+        const del = document.createElement("button"); del.textContent = "Usuń"; del.className = "btn-primary"; del.style.background = "linear-gradient(135deg, #7f1d1d, #ef4444)"; del.style.padding = "8px 16px"; del.style.fontSize = "11px"; del.style.boxShadow = "none";
+        del.addEventListener("click", () => { if (!confirm("Na pewno usunąć raport z tej sesji?")) return; const all = loadSessions().filter(s => s.id !== sess.id); saveSessions(all); refreshHistory(); });
+
+        btns.appendChild(open); btns.appendChild(del); row.appendChild(title); row.appendChild(date); row.appendChild(btns); historyList.appendChild(row);
+      });
+    }
+
+    // -------------------------------------------------------
+    // CHARTS NEON RENDER & AI HOT SPOTS
+    // -------------------------------------------------------
+    Chart.defaults.color = '#38bdf8';
+    Chart.defaults.font.family = "system-ui, sans-serif";
+
+    function buildCharts(sess) {
+      const ev = Array.isArray(sess.events) ? sess.events : [];
+      const ps = Array.isArray(sess.pressureSamples) ? sess.pressureSamples : [];
+
+      const mapY = t => t === "rzut" ? 1 : t === "branie" ? 2 : t === "ryba" ? 3 : 0;
+      const mapColor = t => t === "rzut" ? "#4ade80" : t === "branie" ? "#facc15" : t === "ryba" ? "#f87171" : "#64748b";
+
+      const eventsData = ev.map(e => ({ x: Math.max(0, e.t || 0), y: mapY(e.type), type: e.type }));
+      const pressureData = ps.map(p => ({ x: Math.max(0, p.t || 0), y: p.p }));
+
+      // Obliczanie AI Hot Spots do wyświetlenia na wykresie ciśnienia
+      const hotScores = analyzeHotMoments(ev, ps);
+      const hotData = hotScores.filter(h => h.score >= 5).map(h => {
+        const pSnap = ps.slice().reverse().find(p => p.t <= h.t);
+        return { x: h.t, y: pSnap ? pSnap.p : (ps[0] ? ps[0].p : 0) };
+      });
+
+      if (chartEvents) chartEvents.destroy();
+      if (chartPressure) chartPressure.destroy();
+
+      // NEON TOOLTIP CONFIG
+      const tooltipConfig = {
+        backgroundColor: "rgba(15,23,42,0.9)", borderColor: "rgba(56,189,248,0.6)", borderWidth: 1, titleColor: "#38bdf8", bodyColor: "#e5e7eb", displayColors: false, padding: 10
+      };
+
+      chartEvents = new Chart(chartEventsCtx, {
+        type: "scatter",
+        data: {
+          datasets: [{
+            data: eventsData, pointRadius: 6, pointHoverRadius: 8,
+            pointBackgroundColor: eventsData.map(d => mapColor(d.type)), pointBorderColor: eventsData.map(d => mapColor(d.type)), pointBorderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false }, tooltip: { ...tooltipConfig, callbacks: { label: ctx => `${ctx.raw.type.toUpperCase()} · ${ctx.raw.x.toFixed(1)} min` } } },
+          scales: {
+            x: { type: "linear", min: 0, grid: { color: "rgba(56,189,248,0.15)" }, ticks: { color: "#38bdf8" } },
+            y: { type: "linear", min: 0, max: 4, ticks: { stepSize: 1, color: "#38bdf8", callback: v => v === 1 ? "Rzut" : v === 2 ? "Branie" : v === 3 ? "Ryba" : "" }, grid: { color: "rgba(56,189,248,0.15)" } }
+          }
+        }
+      });
+
+      chartPressure = new Chart(chartPressureCtx, {
+        type: "line",
+        data: {
+          datasets: [
+            {
+              label: "Ciśnienie", data: pressureData, borderColor: "#38bdf8", borderWidth: 2, backgroundColor: "rgba(56,189,248,0.15)",
+              tension: 0.4, pointRadius: 3, pointHoverRadius: 5, pointBackgroundColor: "#38bdf8"
+            },
+            {
+              type: "scatter", label: "AI Hot Moment", data: hotData, pointRadius: 8, pointHoverRadius: 10,
+              pointBackgroundColor: "rgba(255,0,128,0.9)", pointBorderColor: "rgba(255,0,128,1)", pointBorderWidth: 2
+            }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false }, tooltip: { ...tooltipConfig, callbacks: { label: ctx => `${ctx.raw.y.toFixed(1)} hPa · ${ctx.raw.x.toFixed(1)} min` } } },
+          scales: {
+            x: { type: "linear", min: 0, grid: { color: "rgba(56,189,248,0.15)" }, ticks: { color: "#38bdf8" } },
+            y: { type: "linear", grid: { color: "rgba(56,189,248,0.15)" }, ticks: { color: "#38bdf8" } }
+          }
+        }
+      });
+
+      statRzuty.textContent = ev.filter(e => e.type === "rzut").length;
+      statBrania.textContent = ev.filter(e => e.type === "branie").length;
+      statRyby.textContent = ev.filter(e => e.type === "ryba").length;
+
+      const w = sess.weatherEnd || lastWeather;
+      if (w) {
+        statTemp.textContent = `${w.temp.toFixed(1)}°C`; statPress.textContent = `${w.press.toFixed(0)} hPa`; statWind.textContent = `${w.wind.toFixed(1)} km/h ${w.dir}`;
+      } else { statTemp.textContent = "--"; statPress.textContent = "--"; statWind.textContent = "--"; }
+
+      if (sess.diary && sess.diary.trim() !== "") {
+        statNotes.textContent = sess.diary; statNotesContainer.style.display = "flex";
+      } else { statNotesContainer.style.display = "none"; statNotes.textContent = ""; }
+      
+      updateAIHotPanel();
+    }
+
+    function showChartsForSession(sess) {
+      buildCharts(sess);
+      openModal("modalCharts");
+    }
+
+    // -------------------------------------------------------
+    // BINDINGS & INIT
+    // -------------------------------------------------------
+    btnExport.addEventListener("click", () => {
+      const area = document.getElementById("chartsExportArea");
+      html2canvas(area, { backgroundColor: "#0f172a", scale: window.devicePixelRatio || 2 }).then(canvas => {
+        const a = document.createElement("a"); a.download = `feeder_ultra_${Date.now()}.jpg`; a.href = canvas.toDataURL("image/jpeg", 0.9); a.click();
+      });
+    });
+
+    btnFullscreen.addEventListener("click", () => {
+      const doc = document, el = document.documentElement;
+      const isFs = doc.fullscreenElement || doc.webkitFullscreenElement || doc.msFullscreenElement;
+      if (!isFs) { const r = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen; if (r) r.call(el); }
+      else { const e = doc.exitFullscreen || doc.webkitExitFullscreen || doc.msExitFullscreen; if (e) e.call(doc); }
+    });
+
+    btnStart.addEventListener("click", toggleStart);
+    btnRzut.addEventListener("click", () => addEvent("rzut"));
+    btnBranie.addEventListener("click", () => addEvent("branie"));
+    btnRyba.addEventListener("click", () => addEvent("ryba"));
+    btnCharts.addEventListener("click", () => showChartsForSession(currentSnapshot()));
+    btnHistory.addEventListener("click", () => { refreshHistory(); openModal("modalHistory"); });
+    btnSave.addEventListener("click", () => openModal("modalSave"));
+    btnSaveConfirm.addEventListener("click", () => {
+      const snap = currentSnapshot(); const all = loadSessions(); all.push(snap); saveSessions(all);
+      closeModal("modalSave"); alert("SESJA ULTRA ZAPISANA DO BAZY 🚀");
+    });
+    btnSettings.addEventListener("click", () => {
+      inputFishingHours.value = fishingTotalSeconds / 3600; inputIntervalMinutes.value = intervalTotalSeconds / 60;
+      openModal("modalSettings");
+    });
+
+    function init() {
+      btnStart.classList.add("loading"); btnStart.setAttribute("disabled", "true");
+      fishingRemaining = fishingTotalSeconds; intervalRemaining = intervalTotalSeconds;
+      updateTimers(); enableMainButtons(false); 
+      initClock(); initWeather(); initMotionUI(); applyNightFishingMode();
+    }
+
+    document.addEventListener("DOMContentLoaded", init);
+  </script>
+</body>
+</html>
