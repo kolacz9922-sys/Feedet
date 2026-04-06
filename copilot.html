@@ -681,18 +681,22 @@ function toggleStart() {
     // EVENTS (RZUT / BRANIE / RYBA)
     // -------------------------------------------------------
     function addEvent(type) {
-      if (!timersRunning) return;
-      const t = minutesFromStart();
-      events.push({ t, type });
+  if (!timersRunning) return;
 
-      const freq = type === "ryba" ? 660 : type === "branie" ? 560 : 480;
-      beep(120, freq, 0.25);
-      vibrate(60);
+  // 🔥 ZABEZPIECZENIE PRZED UJEMNYM CZASEM
+  const t = Math.max(0, minutesFromStart());
 
-      intervalRemaining = intervalTotalSeconds;
-      intervalExpiredNotified = false;
-      resetIntervalVisual();
-    }
+  events.push({ t, type });
+
+  const freq = type === "ryba" ? 660 : type === "branie" ? 560 : 480;
+  beep(120, freq, 0.25);
+  vibrate(60);
+
+  intervalRemaining = intervalTotalSeconds;
+  intervalExpiredNotified = false;
+  resetIntervalVisual();
+}
+
 
     // -------------------------------------------------------
     // MODALS
