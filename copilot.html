@@ -642,17 +642,27 @@
       }
 
       if (!pressureId) {
-        if (lastWeather && typeof lastWeather.press === "number") {
-          pressureSamples.push({ t: minutesFromStart(), p: lastWeather.press });
-        }
-        pressureId = setInterval(() => {
-          if (lastWeather && typeof lastWeather.press === "number") {
-            pressureSamples.push({ t: minutesFromStart(), p: lastWeather.press });
-          }
-          initWeather();
-        }, 15 * 60 * 1000);
-      }
+  // Dodaj próbkę TYLKO jeśli timer już działa
+  if (timersRunning && lastWeather && typeof lastWeather.press === "number") {
+    pressureSamples.push({
+      t: Math.max(0, minutesFromStart()),
+      p: lastWeather.press
+    });
+  }
+
+  pressureId = setInterval(() => {
+    // Zabezpieczenie przed ujemnym czasem
+    if (timersRunning && lastWeather && typeof lastWeather.press === "number") {
+      pressureSamples.push({
+        t: Math.max(0, minutesFromStart()),
+        p: lastWeather.press
+      });
     }
+
+    initWeather();
+  }, 15 * 60 * 1000);
+}
+
 
     function pauseTimers() {
       timersRunning = false;
