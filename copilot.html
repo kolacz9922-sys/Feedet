@@ -878,14 +878,19 @@
               ticks: { color: "#9ca3af" },
               grid: { color: "rgba(55,65,81,0.6)" }
             },
-            y: {
+           y: {
               type: "linear",
-              min: 0.5,
-              max: 3.5,
+              min: 0,
+              max: 4,
               ticks: {
                 stepSize: 1,
                 color: "#9ca3af",
-                callback: v => v === 1 ? "Rzut" : v === 2 ? "Branie" : v === 3 ? "Ryba" : ""
+                callback: function(value) {
+                  if (value === 1) return "Rzut";
+                  if (value === 2) return "Branie";
+                  if (value === 3) return "Ryba";
+                  return "";
+                }
               },
               grid: { color: "rgba(55,65,81,0.6)" }
             }
