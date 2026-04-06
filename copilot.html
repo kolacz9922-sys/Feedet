@@ -616,52 +616,54 @@
       elTimerInterval.textContent = formatMS(intervalRemaining);
     }
 
-    function startTimers() {
-      if (timersRunning) return;
-      timersRunning = true;
-      btnStart.textContent = "⏸ Pauza";
-      enableMainButtons(true);
+   function startTimers() {
+  if (timersRunning) return;
+  timersRunning = true;
+  btnStart.textContent = "⏸ Pauza";
+  enableMainButtons(true);
 
-      if (!tickId) {
-        tickId = setInterval(() => {
-          if (!timersRunning) return;
-          elapsedSeconds++;
-          fishingRemaining = Math.max(0, fishingRemaining - 1);
-          intervalRemaining = Math.max(0, intervalRemaining - 1);
-
-          if (intervalRemaining === 0) {
-            elIntervalLine.classList.add("expired");
-            if (!intervalExpiredNotified) {
-              beep(200, 520, 0.25);
-              vibrate([80, 60, 80]);
-              intervalExpiredNotified = true;
-            }
-          }
-          updateTimers();
-        }, 1000);
-      }
-
-      if (!pressureId) {
-  // Dodaj próbkę TYLKO jeśli timer już działa
-  if (timersRunning && lastWeather && typeof lastWeather.press === "number") {
+  // 🔥 DODANE — pierwsza próbka ciśnienia natychmiast po starcie
+  if (lastWeather && typeof lastWeather.press === "number") {
     pressureSamples.push({
-      t: Math.max(0, minutesFromStart()),
+      t: 0, // zawsze 0 na starcie
       p: lastWeather.press
     });
   }
 
-  pressureId = setInterval(() => {
-    // Zabezpieczenie przed ujemnym czasem
-    if (timersRunning && lastWeather && typeof lastWeather.press === "number") {
-      pressureSamples.push({
-        t: Math.max(0, minutesFromStart()),
-        p: lastWeather.press
-      });
-    }
+  // GŁÓWNY TIMER
+  if (!tickId) {
+    tickId = setInterval(() => {
+      if (!timersRunning) return;
+      elapsedSeconds++;
+      fishingRemaining = Math.max(0, fishingRemaining - 1);
+      intervalRemaining = Math.max(0, intervalRemaining - 1);
 
-    initWeather();
-  }, 15 * 60 * 1000);
+      if (intervalRemaining === 0) {
+        elIntervalLine.classList.add("expired");
+        if (!intervalExpiredNotified) {
+          beep(200, 520, 0.25);
+          vibrate([80, 60, 80]);
+          intervalExpiredNotified = true;
+        }
+      }
+      updateTimers();
+    }, 1000);
+  }
+
+  // TIMER CIŚNIENIA
+  if (!pressureId) {
+    pressureId = setInterval(() => {
+      if (timersRunning && lastWeather && typeof lastWeather.press === "number") {
+        pressureSamples.push({
+          t: Math.max(0, minutesFromStart()),
+          p: lastWeather.press
+        });
+      }
+      initWeather();
+    }, 15 * 60 * 1000);
+  }
 }
+
 
 
     function pauseTimers() {
