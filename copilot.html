@@ -591,7 +591,7 @@
           elWeatherSub.textContent =
             `Ciśnienie: ${press.toFixed(0)} hPa · Wiatr: ${windKmh.toFixed(1)} km/h ${dir}`;
 
-          lastWeather = { temp, press, windKmh, dir };
+          lastWeather = { temp, press, wind: windKmh, dir };
           // --- PATCH: pogoda pobrana, odblokuj START ---
 weatherReady = true;
 btnStart.classList.remove("loading");
