@@ -1161,14 +1161,20 @@ function initVoice() {
     handleVoiceCommand(text);
   };
 
+  // KLUCZOWA POPRAWKA — Chrome kończy sesję po każdym wyniku
+  recognition.onend = () => {
+    if (voiceActive) recognition.start();
+  };
+
   recognition.onerror = () => {
-    // automatycznie restartujemy, żeby nie wyłączało się samo
     if (voiceActive) recognition.start();
   };
 }
 
 function handleVoiceCommand(cmd) {
   console.log("VOICE:", cmd);
+}
+
 
   // --- ZDARZENIA ---
   if (cmd.includes("trener rzut")) {
