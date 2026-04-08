@@ -310,9 +310,10 @@
       </div>
       <div style="display:flex; align-items:center; gap:10px;">
         <div class="clock" id="clockTime">--:--:--</div>
-        <div class="btn-icon" id="btnSettings">⚙️</div>
-        <div class="btn-icon" id="btnVoice">🎤</div>
-        <div class="btn-icon" id="btnFullscreen">🔲</div>
+       <div class="btn-icon" id="btnSettings">⚙️</div>
+<div class="btn-icon" id="btnFullscreen">🔲</div>
+<div class="btn-icon" id="btnVoice">🎤</div>
+
       </div>
     </div>
 
@@ -1041,21 +1042,25 @@
       });
     });
 
-    // -------------------------------------------------------
-    // FULLSCREEN
-    // -------------------------------------------------------
-    btnFullscreen.addEventListener("click", () => {
-      const doc = document;
-      const el = document.documentElement;
-      const isFs = doc.fullscreenElement || doc.webkitFullscreenElement || doc.msFullscreenElement;
-      if (!isFs) {
-        const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
-        if (req) req.call(el);
-      } else {
-        const exit = doc.exitFullscreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
-        if (exit) exit.call(doc);
-      }
-    });
+}
+
+ // -------------------------------------------------------
+ // FULLSCREEN
+ // -------------------------------------------------------
+btnFullscreen.addEventListener("click", () => {
+  const doc = document;
+  const el = document.documentElement;
+  const isFs = doc.fullscreenElement || doc.webkitFullscreenElement || doc.msFullscreenElement;
+  if (!isFs) {
+    const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+    if (req) req.call(el);
+  } else {
+    const exit = doc.exitFullscreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+    if (exit) exit.call(doc);
+  }
+});
+
+
 
     // -------------------------------------------------------
     // BUTTON BINDINGS
