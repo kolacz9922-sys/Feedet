@@ -311,6 +311,7 @@
       <div style="display:flex; align-items:center; gap:10px;">
         <div class="clock" id="clockTime">--:--:--</div>
         <div class="btn-icon" id="btnSettings">⚙️</div>
+        <div class="btn-icon" id="btnVoice">🎤</div>
         <div class="btn-icon" id="btnFullscreen">🔲</div>
       </div>
     </div>
@@ -1063,6 +1064,7 @@
     btnRzut.addEventListener("click", () => addEvent("rzut"));
     btnBranie.addEventListener("click", () => addEvent("branie"));
     btnRyba.addEventListener("click", () => addEvent("ryba"));
+    btnVoice.addEventListener("click", toggleVoice);
 
     btnCharts.addEventListener("click", () => {
       const snap = currentSnapshot();
@@ -1136,6 +1138,99 @@
       } catch {}
     })();
 
+// -------------------------------------------------------
+// VOICE CONTROL
+// -------------------------------------------------------
+let recognition = null;
+let voiceActive = false;
+
+function initVoice() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    alert("Twoja przeglądarka nie obsługuje sterowania głosem.");
+    return;
+  }
+
+  recognition = new SpeechRecognition();
+  recognition.lang = "pl-PL";
+  recognition.continuous = true;
+  recognition.interimResults = false;
+
+  recognition.onresult = e => {
+    const text = e.results[e.results.length - 1][0].transcript.trim().toLowerCase();
+    handleVoiceCommand(text);
+  };
+
+  recognition.onerror = () => {
+    // automatycznie restartujemy, żeby nie wyłączało się samo
+    if (voiceActive) recognition.start();
+  };
+}
+
+function handleVoiceCommand(cmd) {
+  console.log("VOICE:", cmd);
+
+  // --- ZDARZENIA ---
+  if (cmd.includes("trener rzut")) {
+    addEvent("rzut");
+    return;
+  }
+  if (cmd.includes("trener branie")) {
+    addEvent("branie");
+    return;
+  }
+  if (cmd.includes("trener ryba")) {
+    addEvent("ryba");
+    return;
+  }
+
+  // --- ZMIANA CZASU ---
+  if (cmd.includes("trener czas")) {
+    const match = cmd.match(/(\d+)\s*min/);
+    if (match) {
+      const min = parseInt(match[1], 10);
+      if (!isNaN(min) && min > 0 && min <= 180) {
+        intervalTotalSeconds = min * 60;
+        intervalRemaining = intervalTotalSeconds;
+        intervalExpiredNotified = false;
+        resetIntervalVisual();
+        updateTimers();
+      }
+    }
+    return;
+  }
+
+  // --- WYKRES ---
+  if (cmd.includes("trener wykres")) {
+    const snap = currentSnapshot();
+    showChartsForSession(snap);
+    return;
+  }
+
+  // --- WRÓĆ ---
+  if (cmd.includes("trener wróć")) {
+    closeModal("modalCharts");
+    return;
+  }
+}
+
+function toggleVoice() {
+  if (!recognition) return;
+
+  if (!voiceActive) {
+    voiceActive = true;
+    recognition.start();
+    btnVoice.style.borderColor = "rgba(56,189,248,0.8)";
+    btnVoice.style.color = "#38bdf8";
+  } else {
+    voiceActive = false;
+    recognition.stop();
+    btnVoice.style.borderColor = "";
+    btnVoice.style.color = "";
+  }
+}
+
+    
     // -------------------------------------------------------
     // INIT
     // -------------------------------------------------------
@@ -1143,6 +1238,8 @@
       // POPRAWKA NR 6: Upewniamy się, że przycisk wita nas stanem ładowania (choć robi to już HTML)
       btnStart.classList.add("loading");
       btnStart.setAttribute("disabled", "true");
+      initVoice();
+
       
       fishingTotalSeconds = FISHING_DEFAULT_HOURS * 3600;
       intervalTotalSeconds = INTERVAL_DEFAULT_MIN * 60;
