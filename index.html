@@ -1161,7 +1161,6 @@ function initVoice() {
     handleVoiceCommand(text);
   };
 
-  // KLUCZOWA POPRAWKA — Chrome kończy sesję po każdym wyniku
   recognition.onend = () => {
     if (voiceActive) recognition.start();
   };
@@ -1173,8 +1172,6 @@ function initVoice() {
 
 function handleVoiceCommand(cmd) {
   console.log("VOICE:", cmd);
-}
-
 
   // --- ZDARZENIA ---
   if (cmd.includes("trener rzut")) {
@@ -1236,7 +1233,6 @@ function toggleVoice() {
   }
 }
 
-    
     // -------------------------------------------------------
     // INIT
     // -------------------------------------------------------
