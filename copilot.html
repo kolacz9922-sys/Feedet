@@ -988,10 +988,14 @@
         }
       });
 
-      const rzuty = ev.filter(e => e.type === "rzut").length;
+      const pusteRzuty = ev.filter(e => e.type === "rzut").length;
       const brania = ev.filter(e => e.type === "branie").length;
       const ryby = ev.filter(e => e.type === "ryba").length;
-      statRzuty.textContent = rzuty;
+      
+      // Sumujemy wszystko, żeby wiedzieć ile razy wędka faktycznie poleciała do wody
+      const wszystkieRzuty = pusteRzuty + brania + ryby;
+
+      statRzuty.textContent = wszystkieRzuty; // Wyświetlamy sumę
       statBrania.textContent = brania;
       statRyby.textContent = ryby;
 
