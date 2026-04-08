@@ -1161,7 +1161,6 @@ function initVoice() {
     handleVoiceCommand(text);
   };
 
-  // restart z opóźnieniem — usuwa piknięcia
   recognition.onend = () => {
     if (voiceActive) {
       setTimeout(() => recognition.start(), 500);
@@ -1178,7 +1177,6 @@ function initVoice() {
 function handleVoiceCommand(cmd) {
   console.log("VOICE:", cmd);
 
-  // --- ZDARZENIA ---
   if (cmd.includes("trener rzut")) {
     addEvent("rzut");
     return;
@@ -1192,7 +1190,6 @@ function handleVoiceCommand(cmd) {
     return;
   }
 
-  // --- ZMIANA CZASU ---
   if (cmd.includes("trener czas")) {
     const match = cmd.match(/(\d+)\s*min/);
     if (match) {
@@ -1208,21 +1205,13 @@ function handleVoiceCommand(cmd) {
     return;
   }
 
-  // --- WYKRES ---
   if (cmd.includes("trener wykres")) {
     const snap = currentSnapshot();
     showChartsForSession(snap);
     return;
   }
 
-  // --- ZAMKNIJ WYKRES ---
-  if (cmd.includes("trener zamknij wykres") || cmd.includes("trener zamknij")) {
-    closeModal("modalCharts");
-    return;
-  }
-
-  // --- WRÓĆ ---
-  if (cmd.includes("trener wróć")) {
+  if (cmd.includes("trener zamknij wykres") || cmd.includes("trener zamknij") || cmd.includes("trener wróć")) {
     closeModal("modalCharts");
     return;
   }
