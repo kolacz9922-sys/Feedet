@@ -658,7 +658,7 @@
 
       if (lastWeather && typeof lastWeather.press === "number") {
         pressureSamples.push({
-          t: 0,
+          t: minutesFromStart(), // TERAZ POBIERZE WŁAŚCIWY CZAS!
           p: lastWeather.press
         });
       }
