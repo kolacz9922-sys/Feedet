@@ -1,645 +1,1167 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#0f172a">
-    <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Feeder%20Trener%22%2C%22short_name%22%3A%22Feeder%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230f172a%22%7D">
+  <meta charset="UTF-8" />
+  <title>Feeder Trener PRO — PRO MAX</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f172a" />
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+  <style>
+    /* -------------------------------------------------------
+       ROOT VARIABLES
+    ------------------------------------------------------- */
+    :root {
+      --bg: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      --glass: rgba(15, 23, 42, 0.7);
+      --border: rgba(148, 163, 184, 0.4);
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --green: #22c55e;
+      --yellow: #eab308;
+      --red: #ef4444;
+      --blue: #38bdf8;
+      --radius: 16px;
+      --shadow: 0 18px 45px rgba(0,0,0,0.45);
+    }
+
+    /* -------------------------------------------------------
+       GLOBAL
+    ------------------------------------------------------- */
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, sans-serif;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding-bottom: 80px;
+    }
     
-    <title>Feeder Trener PRO - FullScreen</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <style>
-        :root {
-            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            --glass-bg: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --grad-green: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            --grad-yellow: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-            --grad-red: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
-            --grad-blue: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-            --grad-purple: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
-            --grad-dark: linear-gradient(135deg, #334155 0%, #1e293b 100%);
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --accent-glow: 0 8px 24px rgba(0,0,0,0.4);
-        }
+    /* POPRAWKA NR 3: dodano flex: 1 */
+    .app {
+      flex: 1; 
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+    
+    .glass {
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      box-shadow: var(--shadow);
+    }
 
-        body { 
-            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; 
-            background: var(--bg-gradient); 
-            color: var(--text-main); 
-            margin: 0; 
-            display: flex; 
-            flex-direction: column; 
-            min-height: 100vh;
-            min-height: 100dvh;
-            overflow-y: auto; 
-            /* Zapobiega przypadkowemu zaznaczaniu tekstu przy szybkim klikaniu */
-            user-select: none; 
-            -webkit-user-select: none;
-        }
+    /* -------------------------------------------------------
+       TOP BAR
+    ------------------------------------------------------- */
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 16px;
+      align-items: center;
+    }
+    .weather-main { font-size: 14px; font-weight: 600; }
+    .weather-sub { font-size: 11px; color: var(--muted); }
+    .clock { font-size: 14px; font-variant-numeric: tabular-nums; }
 
-        .top-bar { 
-            display: flex; justify-content: space-between; padding: 6px 15px; 
-            background: rgba(0, 0, 0, 0.2); backdrop-filter: blur(10px);
-            font-size: 11px; color: var(--text-muted); align-items: center; 
-            border-bottom: 1px solid var(--glass-border);
-        }
-        .weather-info { color: #fbbf24; font-weight: 600; letter-spacing: 0.5px; }
-        .real-clock { color: #60a5fa; font-weight: 700; font-size: 12px; letter-spacing: 1px;}
-        
-        .fs-btn {
-            background: none; border: none; color: #94a3b8; font-size: 16px; 
-            margin-left: 10px; cursor: pointer; transition: color 0.2s; padding: 0;
-        }
-        .fs-btn:active { color: white; transform: scale(0.9); }
+    .btn-icon {
+      width: 32px; height: 32px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(15,23,42,0.9);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+    }
 
-        .header { 
-            display: flex; justify-content: space-between; align-items: center; 
-            padding: 10px 20px; margin: 10px 15px;
-            background: var(--glass-bg); border: 1px solid var(--glass-border);
-            border-radius: 20px; box-shadow: var(--accent-glow);
-        }
-        .timer-box { text-align: center; }
-        .timer-label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 1px; margin-bottom: 3px; }
-        .timer-value { font-size: 28px; font-weight: 900; font-variant-numeric: tabular-nums; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
-        #sessionTimer { color: #e2e8f0; }
-        #intervalTimer { color: #10b981; }
-        .settings-icon { background: none; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; transition: color 0.2s; padding: 0;}
-        .settings-icon:active { color: white; transform: rotate(45deg); }
+    /* -------------------------------------------------------
+       TIMERS
+    ------------------------------------------------------- */
+    .timers {
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .timer-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(15,23,42,0.85);
+      border: 1px solid rgba(148,163,184,0.3);
+    }
+    .timer-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+    }
+    .timer-value {
+      font-size: 22px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+    .timer-main .timer-value { color: var(--blue); }
+    .timer-interval .timer-value { color: var(--green); }
+    .timer-interval.expired .timer-value { color: var(--red); }
 
-        .main-content { flex-grow: 1; display: flex; flex-direction: column; padding: 0 15px 10px 15px; gap: 10px; }
-        .action-btn { 
-            flex: 1; border: none; border-radius: 24px; min-height: 80px;
-            font-size: 24px; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px;
-            color: white; cursor: pointer; 
-            transition: all 0.1s;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3), inset 0 2px 0 rgba(255,255,255,0.2);
-            position: relative; overflow: hidden;
-            /* Wymuszenie braku podświetlenia kliknięcia w Androidzie */
-            -webkit-tap-highlight-color: transparent; 
-        }
-        .action-btn:active { transform: scale(0.96) translateY(2px); box-shadow: 0 4px 10px rgba(0,0,0,0.4); }
-        .action-btn:disabled { opacity: 0.4; filter: grayscale(100%); cursor: not-allowed; transform: none; box-shadow: none; }
-        
-        .btn-przerzuc { background: var(--grad-green); text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
-        .btn-branie { background: var(--grad-yellow); color: #78350f; text-shadow: 0 1px 2px rgba(255,255,255,0.3); }
-        .btn-ryba { background: var(--grad-red); text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+    /* -------------------------------------------------------
+       MAIN BUTTONS
+    ------------------------------------------------------- */
+    .actions {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 16px;
+    }
 
-        .footer { padding: 10px 15px 15px 15px; display: flex; gap: 8px; background: rgba(0,0,0,0.3); border-top: 1px solid var(--glass-border); }
-        .menu-btn { 
-            flex: 1; padding: 12px 2px; font-size: 10px; font-weight: 800; border: none; border-radius: 12px; 
-            cursor: pointer; text-transform: uppercase; color: white; letter-spacing: 0.5px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: transform 0.1s;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .menu-btn:active { transform: scale(0.95); }
-        .btn-start { background: var(--grad-blue); }
-        .btn-chart { background: var(--grad-purple); }
-        .btn-history { background: var(--grad-yellow); color: #78350f; }
-        .btn-save { background: var(--grad-dark); border: 1px solid var(--glass-border); }
+    .btn-main {
+      flex: 1;
+      width: 100%;
+      min-height: 80px; 
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: rgba(15,23,42,0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 26px;
+      font-weight: 700;
+      cursor: pointer;
+    }
 
-        .modal { 
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); 
-            z-index: 100; justify-content: center; align-items: center; flex-direction: column; 
-            animation: fadeIn 0.2s ease-out;
-        }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        
-        .modal-content { 
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); 
-            padding: 20px; border-radius: 24px; width: 85%; max-width: 500px; max-height: 85vh; overflow-y: auto; 
-            border: 1px solid var(--glass-border); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        }
-        .modal-content h2 { margin-top: 0; font-size: 20px; color: #f8fafc; font-weight: 800; letter-spacing: -0.5px; border-bottom: 1px solid #334155; padding-bottom: 10px; margin-bottom: 15px;}
-        
-        .input-group { margin-bottom: 15px; }
-        .input-group label { display: block; font-size: 11px; margin-bottom: 6px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;}
-        .input-group input, .input-group textarea { 
-            width: 100%; padding: 12px; background: rgba(0,0,0,0.2); 
-            border: 1px solid #334155; color: white; border-radius: 12px; 
-            box-sizing: border-box; font-family: inherit; font-size: 14px; transition: border-color 0.2s;
-        }
-        .input-group input:focus, .input-group textarea:focus { outline: none; border-color: #3b82f6; background: rgba(0,0,0,0.4); }
-        
-        .history-item { 
-            background: rgba(255,255,255,0.03); padding: 12px; margin-bottom: 10px; 
-            border-radius: 12px; border: 1px solid var(--glass-border); border-left: 4px solid #3b82f6; 
-            transition: background 0.2s;
-        }
-        .history-item:hover { background: rgba(255,255,255,0.06); }
-        .history-meta { font-size: 11px; color: var(--text-muted); margin-top: 6px; display: flex; gap: 8px;}
-        .history-notes { font-size: 12px; color: #cbd5e1; margin-top: 8px; font-style: italic; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 8px; }
-        .btn-delete-item { color: #ef4444; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border: none; font-size: 14px; cursor: pointer; padding: 8px; transition: background 0.2s; }
-        .btn-delete-item:active { background: rgba(239, 68, 68, 0.3); }
+    .btn-main.disabled { opacity: 0.35; pointer-events: none; }
+    .btn-main.green { border-color: rgba(34,197,94,0.6); color: #22c55e; }
+    .btn-main.yellow { border-color: rgba(234,179,8,0.6); color: #eab308; }
+    .btn-main.red { border-color: rgba(239,68,68,0.6); color: #ef4444; }
 
-        #exportArea { background: #1e293b; padding: 15px; border-radius: 16px; }
-        .charts-wrapper { width: 100%; display: flex; flex-direction: column; gap: 10px; }
-        .chart-box { background: rgba(0,0,0,0.2); padding: 5px; border-radius: 12px; height: 160px; position: relative; border: 1px solid var(--glass-border); }
-        
-        .summary-box { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; margin-top: 15px; font-size: 12px; border: 1px solid var(--glass-border);}
-        .summary-box strong { color: #60a5fa; font-weight: 800; font-size: 14px;}
-        .summary-stats { display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid #334155; padding-bottom: 10px; }
-        .summary-weather { display: flex; flex-direction: column; gap: 4px; color: #94a3b8; font-size: 11px; }
-        .summary-notes-display { margin-top: 10px; padding-top: 10px; border-top: 1px dashed #475569; color: #cbd5e1; font-style: italic; display: none; line-height: 1.4; }
-    </style>
+    /* -------------------------------------------------------
+       BOTTOM NAV
+    ------------------------------------------------------- */
+    .nav {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      padding: 10px;
+      display: flex;
+      justify-content: center;
+      pointer-events: none;
+    }
+    .nav-inner {
+      pointer-events: auto;
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      gap: 6px;
+      padding: 6px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.92);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(18px);
+    }
+    .btn-nav {
+      flex: 1;
+      padding: 10px 4px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.9);
+      border: 1px solid var(--border);
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    /* STYLE DLA STANU ŁADOWANIA (POPRAWKA NR 2, 5, 6) */
+    .btn-nav.primary {
+      background: rgba(56,189,248,0.25);
+      border-color: rgba(56,189,248,0.8);
+      color: #fff;
+    }
+    .btn-nav.primary.loading {
+      opacity: 0.5;
+      pointer-events: none;
+      background: rgba(15,23,42,0.9);
+      border-color: var(--border);
+    }
+    .btn-nav.primary .loader-text { display: none; }
+    .btn-nav.primary .start-text { display: block; }
+    .btn-nav.primary.loading .loader-text { display: block; color: #fbbf24; }
+    .btn-nav.primary.loading .start-text { display: none; }
+
+    /* -------------------------------------------------------
+       MODALS
+    ------------------------------------------------------- */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(12px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+    }
+    .modal-backdrop.active { display: flex; }
+    .modal {
+      width: 90%;
+      max-width: 480px;
+      background: rgba(15,23,42,0.96);
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 90vh;
+      overflow: hidden;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 15px;
+      font-weight: 600;
+    }
+    .modal-body {
+      overflow-y: auto;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+
+    /* -------------------------------------------------------
+       FORMS
+    ------------------------------------------------------- */
+    .form-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
+    .form-group label { font-size: 11px; color: var(--muted); text-transform: uppercase; }
+    .form-input, .form-textarea {
+      background: rgba(15,23,42,0.95);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px;
+      color: var(--text);
+      font-size: 14px;
+    }
+    .form-textarea { min-height: 80px; resize: vertical; }
+
+    .btn-primary {
+      padding: 12px;
+      border-radius: 12px;
+      background: rgba(56,189,248,0.25);
+      border: 1px solid rgba(56,189,248,0.8);
+      font-weight: 600;
+      color: white;
+      cursor: pointer;
+    }
+
+    /* -------------------------------------------------------
+       CHARTS + STATS
+    ------------------------------------------------------- */
+    .charts { display: flex; flex-direction: column; gap: 12px; }
+    .chart-box {
+      padding: 8px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: rgba(15,23,42,0.98);
+    }
+    .chart-title {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    canvas { width: 100% !important; height: 180px !important; }
+
+    .stats {
+      padding: 10px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: rgba(15,23,42,0.98);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .stats-row { display: flex; justify-content: space-between; }
+    .stats-label { font-size: 11px; color: var(--muted); text-transform: uppercase; }
+    .stats-value { font-size: 14px; font-weight: 600; }
+  </style>
 </head>
+
 <body>
+  <div class="app">
 
-    <div class="top-bar">
-        <span id="weatherDisplay" class="weather-info">⛅ Pobieranie...</span>
-        <div style="display:flex; align-items:center;">
-            <span class="real-clock" id="realClock">00:00:00</span>
-            <button class="fs-btn" onclick="toggleFullScreen()" title="Pełny Ekran">🔲</button>
+    <div class="glass topbar">
+      <div>
+        <div class="weather-main" id="weatherMain">Pogoda: --°C</div>
+        <div class="weather-sub" id="weatherSub">Ciśnienie: -- hPa · Wiatr: -- km/h</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div class="clock" id="clockTime">--:--:--</div>
+        <div class="btn-icon" id="btnSettings">⚙️</div>
+        <div class="btn-icon" id="btnFullscreen">🔲</div>
+      </div>
+    </div>
+
+    <div class="glass timers">
+      <div class="timer-row timer-main">
+        <div><div class="timer-label">Czas łowienia</div></div>
+        <div class="timer-value" id="timerFishing">04:00:00</div>
+      </div>
+      <div class="timer-row timer-interval" id="intervalLine">
+        <div><div class="timer-label">Zestaw w wodzie</div></div>
+        <div class="timer-value" id="timerInterval">00:03:00</div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <div class="btn-main green disabled" id="btnRzut">🔄 Rzut</div>
+      <div class="btn-main yellow disabled" id="btnBranie">⚠️ Branie</div>
+      <div class="btn-main red disabled" id="btnRyba">🐟 Ryba</div>
+    </div>
+
+  </div>
+
+  <div class="nav">
+    <div class="nav-inner">
+      <div class="btn-nav primary loading" id="btnStart" disabled>
+        <span class="loader-text">⏳ Pogoda...</span>
+        <span class="start-text">▶ Start</span>
+      </div>
+      <div class="btn-nav" id="btnCharts">📊 Wykres</div>
+      <div class="btn-nav" id="btnHistory">📁 Historia</div>
+      <div class="btn-nav" id="btnSave">💾 Zapisz</div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modalSettings">
+    <div class="modal">
+      <div class="modal-header">
+        <span>⚙️ Ustawienia</span>
+        <span class="modal-close" data-close="modalSettings" style="cursor:pointer">✕</span>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Czas łowienia (h)</label>
+          <input type="number" id="inputFishingHours" class="form-input" value="4" min="1" max="24">
         </div>
-    </div>
-
-    <div class="header">
-        <div class="timer-box">
-            <div class="timer-label">Czas łowienia</div>
-            <div class="timer-value" id="sessionTimer">04:00:00</div>
+        <div class="form-group">
+          <label>Interwał (min)</label>
+          <input type="number" id="inputIntervalMinutes" class="form-input" value="3" min="1" max="180">
         </div>
-        <div class="timer-box">
-            <div class="timer-label">Zestaw w wodzie</div>
-            <div id="intervalTimer" class="timer-value">03:00</div>
+        <button class="btn-primary" id="btnSaveSettings">Zapisz</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modalSave">
+    <div class="modal">
+      <div class="modal-header">
+        <span>💾 Zapisz sesję</span>
+        <span class="modal-close" data-close="modalSave" style="cursor:pointer">✕</span>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Nazwa łowiska</label>
+          <input type="text" id="inputSpot" class="form-input">
         </div>
-        <button class="settings-icon" onclick="openSettings()">⚙️</button>
-    </div>
-
-    <div class="main-content">
-        <button id="btnP" class="action-btn btn-przerzuc" onclick="logEvent('PRZERZUĆ')" disabled>🔄 Przerzuć</button>
-        <button id="btnB" class="action-btn btn-branie" onclick="logEvent('BRANIE')" disabled>⚠️ Branie</button>
-        <button id="btnR" class="action-btn btn-ryba" onclick="logEvent('RYBA')" disabled>🐟 Ryba</button>
-    </div>
-
-    <div class="footer">
-        <button class="menu-btn btn-start" id="startBtn" onclick="toggleSession()">▶ Start</button>
-        <button class="menu-btn btn-chart" onclick="showCurrentChart()">📊 Wykres</button>
-        <button class="menu-btn btn-history" onclick="openHistory()">📁 Historia</button>
-        <button class="menu-btn btn-save" onclick="openSaveModal()">💾 Zapisz</button>
-    </div>
-
-    <div id="saveModal" class="modal">
-        <div class="modal-content">
-            <h2>Zapisz Sesję</h2>
-            <div class="input-group">
-                <label>Nazwa Łowiska / Zawodów:</label>
-                <input type="text" id="saveName" placeholder="Np. Podgórki Tynieckie Tura 1">
-            </div>
-            <div class="input-group">
-                <label>Dziennik (zanęta, przynęty, wnioski):</label>
-                <textarea id="saveNotes" rows="4" placeholder="Np. Zanęta z dużą ilością jokersa..."></textarea>
-            </div>
-            <div class="modal-actions" style="display:flex; gap:10px; margin-top:20px;">
-                <button onclick="closeSaveModal()" style="flex:1; padding:12px; background:#475569; color:white; border:none; border-radius:12px; font-weight:700; cursor:pointer;">Anuluj</button>
-                <button onclick="confirmSave()" style="flex:1; padding:12px; background:var(--grad-green); color:white; border:none; border-radius:12px; font-weight:700; cursor:pointer;">Zapisz</button>
-            </div>
+        <div class="form-group">
+          <label>Notatki</label>
+          <textarea id="inputDiary" class="form-textarea"></textarea>
         </div>
+        <button class="btn-primary" id="btnSaveConfirm">Zapisz</button>
+      </div>
     </div>
+  </div>
 
-    <div id="historyModal" class="modal">
-        <div class="modal-content">
-            <h2>Archiwum Sesji</h2>
-            <div id="historyList"></div>
-            <button onclick="closeHistory()" style="width:100%; padding:12px; margin-top:15px; background:#475569; color:white; border:none; border-radius:12px; font-weight:700; cursor:pointer;">Zamknij</button>
+  <div class="modal-backdrop" id="modalHistory">
+    <div class="modal">
+      <div class="modal-header">
+        <span>📁 Historia</span>
+        <span class="modal-close" data-close="modalHistory" style="cursor:pointer">✕</span>
+      </div>
+      <div class="modal-body">
+        <div id="historyList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modalCharts">
+    <div class="modal">
+      <div class="modal-header">
+        <span>📊 Wykresy</span>
+        <span class="modal-close" data-close="modalCharts" style="cursor:pointer">✕</span>
+      </div>
+      <div class="modal-body">
+        <div id="chartsExportArea">
+          <div class="charts">
+            <div class="chart-box">
+              <div class="chart-title">Zdarzenia</div>
+              <canvas id="chartEvents"></canvas>
+            </div>
+            <div class="chart-box">
+              <div class="chart-title">Ciśnienie</div>
+              <canvas id="chartPressure"></canvas>
+            </div>
+            <div class="stats">
+              <div class="stats-row">
+                <div><div class="stats-label">Rzuty</div><div class="stats-value" id="statRzuty">0</div></div>
+                <div><div class="stats-label">Brania</div><div class="stats-value" id="statBrania">0</div></div>
+                <div><div class="stats-label">Ryby</div><div class="stats-value" id="statRyby">0</div></div>
+              </div>
+              <div class="stats-row">
+                <div><div class="stats-label">Temp</div><div class="stats-value" id="statTemp">--</div></div>
+                <div><div class="stats-label">Ciśnienie</div><div class="stats-value" id="statPress">--</div></div>
+                <div><div class="stats-label">Wiatr</div><div class="stats-value" id="statWind">--</div></div>
+              </div>
+              <div id="statNotesContainer" style="display: none; flex-direction: column; margin-top: 8px; border-top: 1px dashed rgba(148,163,184,0.3); padding-top: 8px;">
+                <div class="stats-label" style="margin-bottom: 4px;">Dziennik wędkarski</div>
+                <div class="stats-value" id="statNotes" style="font-weight: 400; font-style: italic; font-size: 12px; white-space: pre-wrap; color: #cbd5e1;"></div>
+              </div>
+            </div>
+          </div>
         </div>
+        <button class="btn-primary" id="btnExport" style="margin-top:12px; width:100%">📷 Eksport JPG</button>
+      </div>
     </div>
+  </div>
 
-    <div id="settingsModal" class="modal">
-        <div class="modal-content">
-            <h2>Konfiguracja</h2>
-            <div class="input-group">
-                <label>Czas trwania tury (godziny):</label>
-                <input type="number" id="inputSessionDuration" value="4">
-            </div>
-            <div class="input-group">
-                <label>Czas rzutu / Interwał (minuty):</label>
-                <input type="number" id="inputInterval" value="3">
-            </div>
-            <button onclick="applySettings()" style="width:100%; padding:12px; margin-top:10px; background:var(--grad-blue); color:white; border:none; border-radius:12px; font-weight:700; cursor:pointer;">Zastosuj</button>
-        </div>
-    </div>
+  <script>
+    // -------------------------------------------------------
+    // CONFIG & STATE
+    // -------------------------------------------------------
+    const FISHING_DEFAULT_HOURS = 4;
+    const INTERVAL_DEFAULT_MIN = 3;
 
-    <div id="chartModal" class="modal">
-        <div class="modal-content" style="width: 95%; max-width: 800px; padding: 0; background: transparent; border: none; box-shadow: none;">
-            
-            <div id="exportArea">
-                <h3 style="color: white; margin-top: 0; margin-bottom: 10px; font-size: 18px;" id="chartModalTitle">Analiza Sesji</h3>
-                <div class="charts-wrapper">
-                    <div class="chart-box"><canvas id="sessionChart"></canvas></div>
-                    <div class="chart-box"><canvas id="pressureChart"></canvas></div>
-                </div>
-                
-                <div class="summary-box">
-                    <div class="summary-stats">
-                        <span>🐟 Ryby: <strong id="sumRyby" style="color: #ef4444;">0</strong></span>
-                        <span>⚠️ Brania: <strong id="sumBrania" style="color: #f59e0b;">0</strong></span>
-                        <span>🔄 Rzuty: <strong id="sumRzuty" style="color: #10b981;">0</strong></span>
-                    </div>
-                    <div class="summary-weather" id="sumWeather"></div>
-                    <div class="summary-notes-display" id="sumNotesDisplay"></div>
-                </div>
-            </div>
+    let fishingTotalSeconds = FISHING_DEFAULT_HOURS * 3600;
+    let intervalTotalSeconds = INTERVAL_DEFAULT_MIN * 60;
 
-            <div style="display:flex; gap:10px; margin-top:15px;">
-                <button onclick="closeChart()" style="flex:1; padding:12px; background:rgba(0,0,0,0.5); color:white; border:1px solid #475569; border-radius:12px; font-weight:700; cursor:pointer;">Zamknij</button>
-                <button onclick="exportToJPG()" style="flex:2; padding:12px; background:var(--grad-blue); color:white; border:none; border-radius:12px; font-weight:800; cursor:pointer;">📸 Pobierz (JPG)</button>
-            </div>
-        </div>
-    </div>
+    let fishingRemaining = fishingTotalSeconds;
+    let intervalRemaining = intervalTotalSeconds;
+    let elapsedSeconds = 0;
 
-    <script>
-        Chart.defaults.color = '#94a3b8';
-        Chart.defaults.scale.grid.color = 'rgba(255, 255, 255, 0.05)';
-        Chart.defaults.font.family = "'Inter', sans-serif";
+    let timersRunning = false;
+    let tickId = null;
+    let pressureId = null;
 
-        setInterval(() => { document.getElementById('realClock').innerText = new Date().toLocaleTimeString('pl-PL'); }, 1000);
+    let events = [];           
+    let pressureSamples = [];  
+    let lastWeather = null;
 
-        // FUNKCJA PEŁNEGO EKRANU
-        function toggleFullScreen() {
-            if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement ) {  
-                if (document.documentElement.requestFullscreen) {
-                    document.documentElement.requestFullscreen();
-                } else if (document.documentElement.msRequestFullscreen) {
-                    document.documentElement.msRequestFullscreen();
-                } else if (document.documentElement.mozRequestFullScreen) {
-                    document.documentElement.mozRequestFullScreen();
-                } else if (document.documentElement.webkitRequestFullscreen) {
-                    document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
-                }
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.msExitFullscreen) {
-                    document.msExitFullscreen();
-                } else if (document.mozCancelFullScreen) {
-                    document.mozCancelFullScreen();
-                } else if (document.webkitExitFullscreen) {
-                    document.webkitExitFullscreen();
-                }
-            }
-        }
+    let intervalExpiredNotified = false;
+    let audioCtx = null;
 
-        let currentTemp = "--";
-        let currentPressure = "--";
-        let currentWind = "--";
-        let currentWindDir = "--";
-        let latKrakow = 50.0614, lonKrakow = 19.9366; 
+    let chartEvents = null;
+    let chartPressure = null;
 
-        let audioCtx;
-        function initAudio() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-        }
+    // -------------------------------------------------------
+    // DOM
+    // -------------------------------------------------------
+    const elWeatherMain = document.getElementById("weatherMain");
+    const elWeatherSub = document.getElementById("weatherSub");
+    const elClock = document.getElementById("clockTime");
 
-        function playBeep() {
-            if (!audioCtx) return;
+    const elTimerFishing = document.getElementById("timerFishing");
+    const elTimerInterval = document.getElementById("timerInterval");
+    const elIntervalLine = document.getElementById("intervalLine");
 
-            const duration = 0.15; 
-            const gap = 0.1;       
-            const freq = 1046.50;  
+    const btnRzut = document.getElementById("btnRzut");
+    const btnBranie = document.getElementById("btnBranie");
+    const btnRyba = document.getElementById("btnRyba");
 
-            for (let i = 0; i < 3; i++) {
-                const startTime = audioCtx.currentTime + (i * (duration + gap));
-                
-                const osc = audioCtx.createOscillator();
-                const gainNode = audioCtx.createGain();
-                
-                osc.type = 'triangle'; 
-                osc.frequency.setValueAtTime(freq, startTime);
-                
-                gainNode.gain.setValueAtTime(0, startTime);
-                gainNode.gain.linearRampToValueAtTime(1, startTime + 0.02); 
-                gainNode.gain.setValueAtTime(1, startTime + duration - 0.05);
-                gainNode.gain.linearRampToValueAtTime(0, startTime + duration); 
-                
-                osc.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
-                
-                osc.start(startTime);
-                osc.stop(startTime + duration);
-            }
+    const btnStart = document.getElementById("btnStart");
+    const btnCharts = document.getElementById("btnCharts");
+    const btnHistory = document.getElementById("btnHistory");
+    const btnSave = document.getElementById("btnSave");
+    const btnSettings = document.getElementById("btnSettings");
+    const btnFullscreen = document.getElementById("btnFullscreen");
+    const btnExport = document.getElementById("btnExport");
 
-            if ("vibrate" in navigator) {
-                navigator.vibrate([150, 100, 150, 100, 150]);
-            }
-        }
+    const modalSettings = document.getElementById("modalSettings");
+    const modalSave = document.getElementById("modalSave");
+    const modalHistory = document.getElementById("modalHistory");
+    const modalCharts = document.getElementById("modalCharts");
 
-        function getWindDirectionPl(degree) {
-            if (degree === undefined || degree === null) return "Brak";
-            if (degree >= 337.5 || degree < 22.5) return 'Północny (N)';
-            if (degree >= 22.5 && degree < 67.5) return 'Północno-wschodni (NE)';
-            if (degree >= 67.5 && degree < 112.5) return 'Wschodni (E)';
-            if (degree >= 112.5 && degree < 157.5) return 'Południowo-wschodni (SE)';
-            if (degree >= 157.5 && degree < 202.5) return 'Południowy (S)';
-            if (degree >= 202.5 && degree < 247.5) return 'Południowo-zachodni (SW)';
-            if (degree >= 247.5 && degree < 292.5) return 'Zachodni (W)';
-            if (degree >= 292.5 && degree < 337.5) return 'Północno-zachodni (NW)';
-            return 'Zmienny';
-        }
+    const inputFishingHours = document.getElementById("inputFishingHours");
+    const inputIntervalMinutes = document.getElementById("inputIntervalMinutes");
+    const btnSaveSettings = document.getElementById("btnSaveSettings");
 
-        async function fetchCurrentWeather(lat, lon) {
-            try {
-                const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,surface_pressure,wind_speed_10m,wind_direction_10m`;
-                const response = await fetch(url);
-                const data = await response.json();
-                
-                currentTemp = data.current.temperature_2m;
-                currentPressure = data.current.surface_pressure;
-                currentWind = data.current.wind_speed_10m;
-                currentWindDir = getWindDirectionPl(data.current.wind_direction_10m);
-                
-                document.getElementById('weatherDisplay').innerText = `⛅ ${currentTemp}°C | ${currentPressure} hPa | ${currentWind} km/h`;
-                return currentPressure;
-            } catch (e) {
-                return null;
-            }
-        }
+    const inputSpot = document.getElementById("inputSpot");
+    const inputDiary = document.getElementById("inputDiary");
+    const btnSaveConfirm = document.getElementById("btnSaveConfirm");
+    const historyList = document.getElementById("historyList");
 
+    const chartEventsCtx = document.getElementById("chartEvents").getContext("2d");
+    const chartPressureCtx = document.getElementById("chartPressure").getContext("2d");
+
+    const statRzuty = document.getElementById("statRzuty");
+    const statBrania = document.getElementById("statBrania");
+    const statRyby = document.getElementById("statRyby");
+    const statTemp = document.getElementById("statTemp");
+    const statPress = document.getElementById("statPress");
+    const statWind = document.getElementById("statWind");
+    const statNotesContainer = document.getElementById("statNotesContainer");
+    const statNotes = document.getElementById("statNotes");
+
+    // -------------------------------------------------------
+    // UTILS
+    // -------------------------------------------------------
+    const pad = n => (n < 10 ? "0" + n : "" + n);
+
+    function formatHMS(sec) {
+      const s = Math.max(0, Math.floor(sec));
+      const h = Math.floor(s / 3600);
+      const m = Math.floor((s % 3600) / 60);
+      const ss = s % 60;
+      return `${pad(h)}:${pad(m)}:${pad(ss)}`;
+    }
+
+    function formatMS(sec) {
+      const s = Math.max(0, Math.floor(sec));
+      const m = Math.floor(s / 60);
+      const ss = s % 60;
+      return `00:${pad(m)}:${pad(ss)}`;
+    }
+
+    // POPRAWKA NR 1: Używamy Math.floor zamiast samego dzielenia
+    const minutesFromStart = () => Math.floor(elapsedSeconds / 60);
+
+    function enableMainButtons(on) {
+      [btnRzut, btnBranie, btnRyba].forEach(b => {
+        if (on) b.classList.remove("disabled");
+        else b.classList.add("disabled");
+      });
+    }
+
+    function vibrate(pattern) {
+      if (navigator.vibrate) navigator.vibrate(pattern);
+    }
+
+    function beep(ms = 120, freq = 880, vol = 0.2) {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const ctx = audioCtx;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.value = freq;
+        gain.gain.value = vol;
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        setTimeout(() => osc.stop(), ms);
+      } catch {}
+    }
+
+    // -------------------------------------------------------
+    // CLOCK
+    // -------------------------------------------------------
+    function initClock() {
+      function tick() {
+        const now = new Date();
+        elClock.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+      }
+      tick();
+      setInterval(tick, 1000);
+    }
+
+    // -------------------------------------------------------
+    // WEATHER & START BUTTON UNLOCK
+    // -------------------------------------------------------
+    // Funkcja pomocnicza: zdejmuje blokadę "Ładowanie pogody" z przycisku
+    function unlockStartButton() {
+      btnStart.classList.remove("loading");
+      btnStart.removeAttribute("disabled");
+    }
+
+    function windDirText(deg) {
+      if (deg == null || isNaN(deg)) return "--";
+      const dirs = ["N","NE","E","SE","S","SW","W","NW"];
+      return dirs[Math.round(deg / 45) % 8];
+    }
+
+    function fetchWeather(lat, lon) {
+      const url =
+        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
+        `&current=temperature_2m,pressure_msl,wind_speed_10m,wind_direction_10m&timezone=auto`;
+      fetch(url)
+        .then(r => r.json())
+        .then(d => {
+          if (!d || !d.current) { unlockStartButton(); return; }
+          const c = d.current;
+          const temp = c.temperature_2m;
+          const press = c.pressure_msl;
+          const windMs = c.wind_speed_10m;
+          const windKmh = windMs * 3.6;
+          const dir = windDirText(c.wind_direction_10m);
+
+          elWeatherMain.textContent = `Pogoda: ${temp.toFixed(1)}°C`;
+          elWeatherSub.textContent =
+            `Ciśnienie: ${press.toFixed(0)} hPa · Wiatr: ${windKmh.toFixed(1)} km/h ${dir}`;
+
+          lastWeather = { temp, press, wind: windKmh, dir };
+          
+          // POPRAWKA NR 2 i 5: ODBLOKUJ PRZYCISK START
+          unlockStartButton();
+        })
+        .catch(() => {
+          // Jeśli API padnie, pozwól łowić i odblokuj przycisk!
+          unlockStartButton();
+        });
+    }
+
+    function initWeather() {
+      if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
-            pos => fetchCurrentWeather(pos.coords.latitude, pos.coords.longitude),
-            err => fetchCurrentWeather(latKrakow, lonKrakow) 
+          pos => fetchWeather(pos.coords.latitude, pos.coords.longitude),
+          () => fetchWeather(50.0647, 19.9450),
+          { timeout: 5000, maximumAge: 600000 }
         );
+      } else {
+        fetchWeather(50.0647, 19.9450);
+      }
+      
+      // Zabezpieczenie: jeśli coś utknie, odblokuj start po 4 sekundach awaryjnie
+      setTimeout(unlockStartButton, 4000);
+    }
 
-        let isSessionActive = false;
-        let sessionSecondsElapsed = 0; 
-        let configSessionHours = 4;
-        let configIntervalMinutes = 3; 
-        let intervalSeconds = configIntervalMinutes * 60;
-        
-        let mainIntervalId = null;
-        let pressureIntervalId = null;
-        
-        let eventsLog = []; 
-        let pressureLog = []; 
-        
-        let chart1 = null;
-        let chart2 = null;
+    // -------------------------------------------------------
+    // TIMERS
+    // -------------------------------------------------------
+    function updateTimers() {
+      elTimerFishing.textContent = formatHMS(fishingRemaining);
+      elTimerInterval.textContent = formatMS(intervalRemaining);
+    }
 
-        const sessionTimerEl = document.getElementById('sessionTimer');
-        const intervalTimerEl = document.getElementById('intervalTimer');
-        const startBtn = document.getElementById('startBtn');
-        const actionBtns = [document.getElementById('btnP'), document.getElementById('btnB'), document.getElementById('btnR')];
+    function resetIntervalVisual() {
+      elIntervalLine.classList.remove("expired");
+      elTimerInterval.textContent = formatMS(intervalRemaining);
+    }
 
-        function formatTime(totalSeconds, includeHours = false) {
-            if (totalSeconds < 0) totalSeconds = 0;
-            const h = Math.floor(totalSeconds / 3600);
-            const m = Math.floor((totalSeconds % 3600) / 60);
-            const s = totalSeconds % 60;
-            const pad = (num) => num.toString().padStart(2, '0');
-            return includeHours ? `${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
-        }
+    function startTimers() {
+      if (timersRunning) return;
+      timersRunning = true;
+      btnStart.querySelector('.start-text').textContent = "⏸ Pauza";
+      enableMainButtons(true);
 
-        async function logPressure() {
-            const pressure = await fetchCurrentWeather(latKrakow, lonKrakow);
-            if (pressure) pressureLog.push({ timeSec: sessionSecondsElapsed, pressure: pressure });
-        }
+      if (lastWeather && typeof lastWeather.press === "number") {
+        pressureSamples.push({
+          t: minutesFromStart(), // TERAZ POBIERZE WŁAŚCIWY CZAS!
+          p: lastWeather.press
+        });
+      }
 
-        function tick() {
-            sessionSecondsElapsed++;
-            let timeLeft = (configSessionHours * 3600) - sessionSecondsElapsed;
-            sessionTimerEl.innerText = formatTime(timeLeft, true);
-            
-            if (intervalSeconds > 0) {
-                intervalSeconds--;
-                intervalTimerEl.innerText = formatTime(intervalSeconds);
-                if (intervalSeconds === 0) { 
-                    intervalTimerEl.style.color = "#ef4444"; 
-                    playBeep(); 
+      if (!tickId) {
+        tickId = setInterval(() => {
+          if (!timersRunning) return;
+
+          elapsedSeconds++;
+          fishingRemaining = Math.max(0, fishingRemaining - 1);
+          intervalRemaining = Math.max(0, intervalRemaining - 1);
+
+          if (intervalRemaining === 0) {
+            elIntervalLine.classList.add("expired");
+            if (!intervalExpiredNotified) {
+              beep(200, 520, 0.25);
+              vibrate([80, 60, 80]);
+              intervalExpiredNotified = true;
+            }
+          }
+
+          updateTimers();
+        }, 1000);
+      }
+
+      if (!pressureId) {
+        pressureId = setInterval(() => {
+          if (timersRunning && lastWeather && typeof lastWeather.press === "number") {
+            pressureSamples.push({
+              t: Math.max(0, minutesFromStart()),
+              p: lastWeather.press
+            });
+          }
+          // Uwaga: wywołanie initWeather w pętli znów zablokowałoby START,
+          // więc odpytujemy API bez resetowania stanu UI.
+          if (navigator.geolocation) {
+              navigator.geolocation.getCurrentPosition(
+                  pos => fetchWeather(pos.coords.latitude, pos.coords.longitude),
+                  () => fetchWeather(50.0647, 19.9450)
+              );
+          } else {
+              fetchWeather(50.0647, 19.9450);
+          }
+        }, 15 * 60 * 1000);
+      }
+    }
+
+    function pauseTimers() {
+      timersRunning = false;
+      btnStart.querySelector('.start-text').textContent = "▶ Start";
+      enableMainButtons(false);
+    }
+
+    function toggleStart() {
+      if (btnStart.hasAttribute('disabled')) return; // blokada podczas ładowania
+      if (timersRunning) pauseTimers();
+      else startTimers();
+    }
+
+    // -------------------------------------------------------
+    // EVENTS
+    // -------------------------------------------------------
+    function addEvent(type) {
+      if (!timersRunning) return;
+
+      const t = Math.max(0, minutesFromStart());
+      events.push({ t, type });
+
+      const freq = type === "ryba" ? 660 : type === "branie" ? 560 : 480;
+      beep(120, freq, 0.25);
+      vibrate(60);
+
+      intervalRemaining = intervalTotalSeconds;
+      intervalExpiredNotified = false;
+      resetIntervalVisual();
+    }
+
+    // -------------------------------------------------------
+    // MODALS
+    // -------------------------------------------------------
+    function openModal(id) {
+      document.getElementById(id).classList.add("active");
+    }
+    function closeModal(id) {
+      document.getElementById(id).classList.remove("active");
+    }
+
+    document.querySelectorAll(".modal-close").forEach(el => {
+      el.addEventListener("click", () => closeModal(el.dataset.close));
+    });
+
+    [modalSettings, modalSave, modalHistory, modalCharts].forEach(m => {
+      m.addEventListener("click", e => {
+        if (e.target === m) m.classList.remove("active");
+      });
+    });
+
+    // -------------------------------------------------------
+    // SETTINGS
+    // -------------------------------------------------------
+    btnSaveSettings.addEventListener("click", () => {
+      const h = parseInt(inputFishingHours.value, 10);
+      const m = parseInt(inputIntervalMinutes.value, 10);
+      if (!isNaN(h) && h > 0 && h <= 24) fishingTotalSeconds = h * 3600;
+      if (!isNaN(m) && m > 0 && m <= 180) intervalTotalSeconds = m * 60;
+
+      fishingRemaining = fishingTotalSeconds;
+      intervalRemaining = intervalTotalSeconds;
+      intervalExpiredNotified = false;
+      resetIntervalVisual();
+      updateTimers();
+      closeModal("modalSettings");
+    });
+
+    // -------------------------------------------------------
+    // HISTORY
+    // -------------------------------------------------------
+    const STORAGE_KEY = "feeder_trener_pro_sessions";
+
+    function loadSessions() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        const arr = JSON.parse(raw || "[]");
+        return Array.isArray(arr) ? arr : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveSessions(list) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+      } catch {}
+    }
+
+    function currentSnapshot() {
+      return {
+        id: Date.now(),
+        createdAt: new Date().toISOString(),
+        spot: inputSpot.value || "Bez nazwy",
+        diary: inputDiary.value || "",
+        events: events.slice(),
+        pressureSamples: pressureSamples.slice(),
+        weatherEnd: lastWeather ? { ...lastWeather } : null
+      };
+    }
+
+    function refreshHistory() {
+      const sessions = loadSessions().sort((a, b) => b.id - a.id);
+      historyList.innerHTML = "";
+      if (!sessions.length) {
+        historyList.textContent = "Brak zapisanych sesji.";
+        return;
+      }
+      sessions.forEach(sess => {
+        const row = document.createElement("div");
+        row.style.padding = "8px 10px";
+        row.style.borderBottom = "1px solid rgba(148,163,184,0.3)";
+        const title = document.createElement("div");
+        title.textContent = sess.spot;
+        title.style.fontWeight = "600";
+        const date = document.createElement("div");
+        date.textContent = new Date(sess.createdAt).toLocaleString("pl-PL");
+        date.style.fontSize = "11px";
+        date.style.color = "#9ca3af";
+
+        const btns = document.createElement("div");
+        btns.style.display = "flex";
+        btns.style.gap = "6px";
+        btns.style.marginTop = "4px";
+
+        const open = document.createElement("button");
+        open.textContent = "Otwórz wykres";
+        open.className = "btn-primary";
+        open.style.padding = "4px 8px";
+        open.style.fontSize = "11px";
+        open.addEventListener("click", () => {
+          closeModal("modalHistory");
+          showChartsForSession(sess);
+        });
+
+        const del = document.createElement("button");
+        del.textContent = "Usuń";
+        del.className = "btn-primary";
+        del.style.background = "rgba(239,68,68,0.2)";
+        del.style.borderColor = "rgba(239,68,68,0.8)";
+        del.style.padding = "4px 8px";
+        del.style.fontSize = "11px";
+        del.addEventListener("click", () => {
+          if (!confirm("Usunąć tę sesję?")) return;
+          const all = loadSessions().filter(s => s.id !== sess.id);
+          saveSessions(all);
+          refreshHistory();
+        });
+
+        btns.appendChild(open);
+        btns.appendChild(del);
+
+        row.appendChild(title);
+        row.appendChild(date);
+        row.appendChild(btns);
+        historyList.appendChild(row);
+      });
+    }
+
+    // -------------------------------------------------------
+    // CHARTS
+    // -------------------------------------------------------
+    function buildCharts(sess) {
+      const ev = Array.isArray(sess.events) ? sess.events : [];
+      const ps = Array.isArray(sess.pressureSamples) ? sess.pressureSamples : [];
+
+      const mapY = t => t === "rzut" ? 1 : t === "branie" ? 2 : t === "ryba" ? 3 : 0;
+      const mapColor = t =>
+        t === "rzut" ? "#22c55e" :
+        t === "branie" ? "#eab308" :
+        t === "ryba" ? "#ef4444" : "#64748b";
+
+      const eventsData = ev.map(e => ({
+        x: Math.max(0, e.t || 0),
+        y: mapY(e.type),
+        type: e.type
+      }));
+      const pressureData = ps.map(p => ({
+        x: Math.max(0, p.t || 0),
+        y: p.p
+      }));
+
+      if (chartEvents) chartEvents.destroy();
+      if (chartPressure) chartPressure.destroy();
+
+      chartEvents = new Chart(chartEventsCtx, {
+        type: "scatter",
+        data: {
+          datasets: [{
+            data: eventsData,
+            pointRadius: 5,
+            pointHoverRadius: 6,
+            pointBackgroundColor: eventsData.map(d => mapColor(d.type)),
+            pointBorderColor: eventsData.map(d => mapColor(d.type))
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: ctx => {
+                  const d = ctx.raw;
+                  return `${d.type.toUpperCase()} · ${d.x.toFixed(1)} min`;
                 }
+              }
             }
-        }
-
-        function toggleSession() {
-            initAudio(); 
-            
-            if (!isSessionActive) {
-                isSessionActive = true;
-                startBtn.innerHTML = "⏸ Pauza";
-                startBtn.style.background = "var(--grad-dark)";
-                actionBtns.forEach(btn => btn.disabled = false);
-                
-                mainIntervalId = setInterval(tick, 1000);
-                
-                // POPRAWKA: Natychmiastowe wrzucenie bieżącego ciśnienia na wykres w sekundzie '0'
-                if (currentPressure !== "--") {
-                    pressureLog.push({ timeSec: sessionSecondsElapsed, pressure: currentPressure });
-                } else {
-                    logPressure();
+          },
+          scales: {
+            x: {
+              type: "linear",
+              min: 0,
+              title: { display: true, text: "Czas (minuty)", color: "#9ca3af" },
+              ticks: { color: "#9ca3af" },
+              grid: { color: "rgba(55,65,81,0.6)" }
+            },
+            y: {
+              type: "linear",
+              min: 0,
+              max: 4,
+              ticks: {
+                stepSize: 1,
+                color: "#9ca3af",
+                callback: function(value) {
+                  if (value === 1) return "Rzut";
+                  if (value === 2) return "Branie";
+                  if (value === 3) return "Ryba";
+                  return "";
                 }
-                
-                pressureIntervalId = setInterval(logPressure, 900000); 
-            } else {
-                isSessionActive = false;
-                startBtn.innerHTML = "▶ Start";
-                startBtn.style.background = "var(--grad-blue)";
-                clearInterval(mainIntervalId);
-                clearInterval(pressureIntervalId);
+              },
+              grid: { color: "rgba(55,65,81,0.6)" }
             }
+          }
         }
+      });
 
-        function logEvent(actionType) {
-            initAudio();
-            eventsLog.push({ timeSec: sessionSecondsElapsed, action: actionType, realTime: new Date().toLocaleTimeString('pl-PL') });
-            intervalSeconds = configIntervalMinutes * 60;
-            intervalTimerEl.innerText = formatTime(intervalSeconds);
-            intervalTimerEl.style.color = "#10b981";
-        }
-
-        function openSettings() { document.getElementById('settingsModal').style.display = 'flex'; }
-        
-        function applySettings() {
-            configSessionHours = parseInt(document.getElementById('inputSessionDuration').value);
-            configIntervalMinutes = parseInt(document.getElementById('inputInterval').value);
-            
-            intervalSeconds = configIntervalMinutes * 60;
-            intervalTimerEl.innerText = formatTime(intervalSeconds);
-            intervalTimerEl.style.color = "#10b981"; 
-            
-            if (!isSessionActive) {
-                let timeLeft = configSessionHours * 3600;
-                sessionTimerEl.innerText = formatTime(timeLeft, true);
-                sessionTimerEl.style.color = "#e2e8f0";
-            }
-
-            document.getElementById('settingsModal').style.display = 'none';
-        }
-
-        function openSaveModal() {
-            document.getElementById('saveModal').style.display = 'flex';
-            document.getElementById('saveName').value = "Sesja - " + new Date().toLocaleDateString();
-        }
-        function closeSaveModal() { document.getElementById('saveModal').style.display = 'none'; }
-        
-        function confirmSave() {
-            const name = document.getElementById('saveName').value;
-            const notes = document.getElementById('saveNotes').value;
-            const sessions = JSON.parse(localStorage.getItem('feeder_sessions_v7')) || [];
-            
-            sessions.push({
-                id: Date.now(),
-                name: name,
-                notes: notes,
-                weatherObj: { temp: currentTemp, wind: currentWind, dir: currentWindDir, pressure: currentPressure },
-                date: new Date().toLocaleString(),
-                events: eventsLog,
-                pressures: pressureLog 
-            });
-            
-            localStorage.setItem('feeder_sessions_v7', JSON.stringify(sessions));
-            alert("Sesja zapisana! Możesz ją znaleźć w Historii.");
-            location.reload();
-        }
-
-        function openHistory() {
-            const list = document.getElementById('historyList');
-            list.innerHTML = '';
-            const sessions = JSON.parse(localStorage.getItem('feeder_sessions_v7')) || [];
-            
-            sessions.slice().reverse().forEach(s => {
-                const item = document.createElement('div');
-                item.className = 'history-item';
-                const w = s.weatherObj || { temp: '?', wind: '?', dir: '?', pressure: '?' };
-                item.innerHTML = `
-                    <div style="display:flex; justify-content:space-between; align-items:start;">
-                        <div onclick="showSessionChart('${s.id}')" style="flex-grow:1; cursor:pointer;">
-                            <strong style="color:#60a5fa; font-size:14px;">${s.name}</strong>
-                            <div class="history-meta"><span>📅 ${s.date}</span> <span>🌡️ ${w.temp}°C</span></div>
-                            ${s.notes ? `<div class="history-notes">📝 ${s.notes}</div>` : ''}
-                        </div>
-                        <button class="btn-delete-item" onclick="deleteSession('${s.id}')">🗑️</button>
-                    </div>
-                `;
-                list.appendChild(item);
-            });
-            
-            document.getElementById('historyModal').style.display = 'flex';
-        }
-
-        function deleteSession(id) {
-            if(confirm("Czy na pewno chcesz usunąć tę sesję z archiwum?")) {
-                let sessions = JSON.parse(localStorage.getItem('feeder_sessions_v7'));
-                sessions = sessions.filter(s => s.id != id);
-                localStorage.setItem('feeder_sessions_v7', JSON.stringify(sessions));
-                openHistory();
-            }
-        }
-
-        function showSessionChart(id) {
-            const sessions = JSON.parse(localStorage.getItem('feeder_sessions_v7'));
-            const s = sessions.find(x => x.id == id);
-            document.getElementById('historyModal').style.display = 'none';
-            
-            const w = s.weatherObj || { temp: '-', wind: '-', dir: '-', pressure: '-' };
-            renderDualCharts(s.events, s.pressures || [], s.name, w, s.notes);
-        }
-
-        function showCurrentChart() {
-            if(eventsLog.length === 0 && pressureLog.length === 0) { alert("Brak danych. Wystartuj sesję i zacznij łowić."); return; }
-            const w = { temp: currentTemp, wind: currentWind, dir: currentWindDir, pressure: currentPressure };
-            renderDualCharts(eventsLog, pressureLog, "Bieżąca Sesja (Na Żywo)", w, "Sesja w trakcie. Dodaj notatki podczas zapisu.");
-        }
-
-        function renderDualCharts(eventsData, pressureData, titleText, weatherData, notesText) {
-            document.getElementById('chartModalTitle').innerText = titleText;
-            
-            document.getElementById('sumRyby').innerText = eventsData.filter(d => d.action === 'RYBA').length;
-            document.getElementById('sumBrania').innerText = eventsData.filter(d => d.action === 'BRANIE').length;
-            document.getElementById('sumRzuty').innerText = eventsData.filter(d => d.action === 'PRZERZUĆ').length;
-            
-            document.getElementById('sumWeather').innerHTML = `
-                <span>🌡️ Temp: <strong style="color:white;">${weatherData.temp}°C</strong> | ⏱️ Ciśn: <strong style="color:white;">${weatherData.pressure} hPa</strong></span>
-                <span>💨 Wiatr: <strong style="color:white;">${weatherData.wind} km/h</strong> (${weatherData.dir})</span>
-            `;
-
-            const notesEl = document.getElementById('sumNotesDisplay');
-            if (notesText && notesText.trim() !== "") {
-                notesEl.style.display = "block";
-                notesEl.innerHTML = `<strong>Dziennik Wędkarski:</strong><br><span style="color:#f8fafc;">${notesText.replace(/\n/g, '<br>')}</span>`;
-            } else {
-                notesEl.style.display = "none";
-            }
-
-            document.getElementById('chartModal').style.display = 'flex';
-            
-            let maxTimeSec = 0;
-            if (eventsData.length > 0) maxTimeSec = Math.max(maxTimeSec, eventsData[eventsData.length-1].timeSec);
-            if (pressureData.length > 0) maxTimeSec = Math.max(maxTimeSec, pressureData[pressureData.length-1].timeSec);
-            let maxX = Math.max(60, Math.ceil(maxTimeSec / 60) + 10); 
-
-            if (chart1) chart1.destroy();
-            if (chart2) chart2.destroy();
-
-            const ctx1 = document.getElementById('sessionChart').getContext('2d');
-            chart1 = new Chart(ctx1, {
-                type: 'scatter',
-                data: {
-                    datasets: [
-                        { label: 'Przerzut', data: eventsData.filter(d => d.action === 'PRZERZUĆ').map(d => ({ x: d.timeSec / 60, y: 1, rt: d.realTime })), backgroundColor: '#10b981', pointRadius: 4 },
-                        { label: 'Branie', data: eventsData.filter(d => d.action === 'BRANIE').map(d => ({ x: d.timeSec / 60, y: 2, rt: d.realTime })), backgroundColor: '#f59e0b', pointRadius: 5 },
-                        { label: 'Ryba', data: eventsData.filter(d => d.action === 'RYBA').map(d => ({ x: d.timeSec / 60, y: 3, rt: d.realTime })), backgroundColor: '#ef4444', pointRadius: 6 }
-                    ]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => `${c.dataset.label}: ${c.raw.rt || ''}` } } },
-                    scales: { 
-                        x: { type: 'linear', display: false, min: 0, max: maxX }, 
-                        y: { min: 0, max: 4, ticks: { stepSize: 1, callback: v => ['','Rzut','Branie','Ryba',''][v] } } 
-                    }
+      chartPressure = new Chart(chartPressureCtx, {
+        type: "line",
+        data: {
+          datasets: [{
+            data: pressureData,
+            borderColor: "#38bdf8",
+            backgroundColor: "rgba(56,189,248,0.25)",
+            tension: 0.5,
+            cubicInterpolationMode: "monotone",
+            pointRadius: 2,
+            pointHoverRadius: 3
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: ctx => {
+                  const d = ctx.raw;
+                  return `${d.y.toFixed(1)} hPa · ${d.x.toFixed(1)} min`;
                 }
-            });
-
-            const ctx2 = document.getElementById('pressureChart').getContext('2d');
-            const pData = pressureData.map(d => ({ x: d.timeSec / 60, y: d.pressure }));
-            chart2 = new Chart(ctx2, {
-                type: 'line',
-                data: { 
-                    datasets: [{ 
-                        label: 'Ciśnienie (hPa)', 
-                        data: pData, 
-                        borderColor: '#3b82f6', 
-                        backgroundColor: 'rgba(59, 130, 246, 0.15)', 
-                        borderWidth: 3, 
-                        fill: true, 
-                        tension: 0.5, 
-                        cubicInterpolationMode: 'monotone' 
-                    }] 
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { 
-                        x: { type: 'linear', title: { display: true, text: 'Czas trwania (minuty)' }, min: 0, max: maxX }, 
-                        y: { title: { display: false } } 
-                    }
-                }
-            });
+              }
+            }
+          },
+          scales: {
+            x: {
+              type: "linear",
+              min: 0,
+              title: { display: true, text: "Czas (minuty)", color: "#9ca3af" },
+              ticks: { color: "#9ca3af" },
+              grid: { color: "rgba(55,65,81,0.6)" }
+            },
+            y: {
+              type: "linear",
+              title: { display: true, text: "Ciśnienie (hPa)", color: "#9ca3af" },
+              ticks: { color: "#9ca3af" },
+              grid: { color: "rgba(55,65,81,0.6)" }
+            }
+          }
         }
+      });
 
-        function exportToJPG() {
-            const target = document.getElementById('exportArea');
-            target.style.background = "#1e293b"; 
-            
-            html2canvas(target, { scale: 2 }).then(canvas => {
-                const link = document.createElement('a');
-                const fileNameDate = new Date().toISOString().slice(0,10);
-                link.download = `Raport_Feeder_${fileNameDate}.jpg`;
-                link.href = canvas.toDataURL('image/jpeg', 0.9);
-                link.click();
+      const pusteRzuty = ev.filter(e => e.type === "rzut").length;
+      const brania = ev.filter(e => e.type === "branie").length;
+      const ryby = ev.filter(e => e.type === "ryba").length;
+      
+      // Sumujemy wszystko, żeby wiedzieć ile razy wędka faktycznie poleciała do wody
+      const wszystkieRzuty = pusteRzuty + brania + ryby;
+
+      statRzuty.textContent = wszystkieRzuty; // Wyświetlamy sumę
+      statBrania.textContent = brania;
+      statRyby.textContent = ryby;
+
+      const w = sess.weatherEnd || lastWeather;
+      if (w) {
+        statTemp.textContent = `${w.temp.toFixed(1)}°C`;
+        statPress.textContent = `${w.press.toFixed(0)} hPa`;
+        statWind.textContent = `${w.wind.toFixed(1)} km/h ${w.dir}`;
+      } else {
+        statTemp.textContent = "--";
+        statPress.textContent = "--";
+        statWind.textContent = "--";
+      }
+
+      if (sess.diary && sess.diary.trim() !== "") {
+        statNotes.textContent = sess.diary;
+        statNotesContainer.style.display = "flex";
+      } else {
+        statNotesContainer.style.display = "none";
+        statNotes.textContent = "";
+      }
+    }
+
+    function showChartsForSession(sess) {
+      buildCharts(sess);
+      openModal("modalCharts");
+    }
+
+    // -------------------------------------------------------
+    // EXPORT JPG
+    // -------------------------------------------------------
+    btnExport.addEventListener("click", () => {
+      const area = document.getElementById("chartsExportArea");
+      html2canvas(area, {
+        backgroundColor: "#0f172a",
+        scale: window.devicePixelRatio || 2
+      }).then(canvas => {
+        const a = document.createElement("a");
+        a.download = `feeder_trener_pro_${Date.now()}.jpg`;
+        a.href = canvas.toDataURL("image/jpeg", 0.9);
+        a.click();
+      });
+    });
+
+    // -------------------------------------------------------
+    // FULLSCREEN
+    // -------------------------------------------------------
+    btnFullscreen.addEventListener("click", () => {
+      const doc = document;
+      const el = document.documentElement;
+      const isFs = doc.fullscreenElement || doc.webkitFullscreenElement || doc.msFullscreenElement;
+      if (!isFs) {
+        const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+        if (req) req.call(el);
+      } else {
+        const exit = doc.exitFullscreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+        if (exit) exit.call(doc);
+      }
+    });
+
+    // -------------------------------------------------------
+    // BUTTON BINDINGS
+    // -------------------------------------------------------
+    btnStart.addEventListener("click", toggleStart);
+    btnRzut.addEventListener("click", () => addEvent("rzut"));
+    btnBranie.addEventListener("click", () => addEvent("branie"));
+    btnRyba.addEventListener("click", () => addEvent("ryba"));
+
+    btnCharts.addEventListener("click", () => {
+      const snap = currentSnapshot();
+      showChartsForSession(snap);
+    });
+
+    btnHistory.addEventListener("click", () => {
+      refreshHistory();
+      openModal("modalHistory");
+    });
+
+    btnSave.addEventListener("click", () => {
+      openModal("modalSave");
+    });
+
+    btnSaveConfirm.addEventListener("click", () => {
+      const snap = currentSnapshot();
+      const all = loadSessions();
+      all.push(snap);
+      saveSessions(all);
+      closeModal("modalSave");
+      alert("Sesja zapisana.");
+    });
+
+    btnSettings.addEventListener("click", () => {
+      inputFishingHours.value = fishingTotalSeconds / 3600;
+      inputIntervalMinutes.value = intervalTotalSeconds / 60;
+      openModal("modalSettings");
+    });
+
+    
+    (function setupPWA() {
+      try {
+        const manifest = {
+          name: "Feeder Trener PRO",
+          short_name: "FeederPRO",
+          start_url: ".",
+          display: "standalone",
+          background_color: "#0f172a",
+          theme_color: "#0f172a",
+          icons: []
+        };
+        const blob = new Blob([JSON.stringify(manifest)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("link");
+        link.rel = "manifest";
+        link.href = url;
+        document.head.appendChild(link);
+
+        if ("serviceWorker" in navigator) {
+          const swCode = `
+            const CACHE_NAME = 'feeder-trener-pro-v1';
+            self.addEventListener('install', e => {
+              e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(['./'])));
             });
+            self.addEventListener('activate', e => {
+              e.waitUntil(
+                caches.keys().then(keys =>
+                  Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+                )
+              );
+            });
+            self.addEventListener('fetch', e => {
+              e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
+            });
+          `;
+          const swBlob = new Blob([swCode], { type: "text/javascript" });
+          const swUrl = URL.createObjectURL(swBlob);
+          navigator.serviceWorker.register(swUrl).catch(() => {});
         }
+      } catch {}
+    })();
 
-        function closeHistory() { document.getElementById('historyModal').style.display = 'none'; }
-        function closeChart() { document.getElementById('chartModal').style.display = 'none'; }
-    </script>
+    // -------------------------------------------------------
+    // INIT
+    // -------------------------------------------------------
+    function init() {
+      // POPRAWKA NR 6: Upewniamy się, że przycisk wita nas stanem ładowania (choć robi to już HTML)
+      btnStart.classList.add("loading");
+      btnStart.setAttribute("disabled", "true");
+      
+      fishingTotalSeconds = FISHING_DEFAULT_HOURS * 3600;
+      intervalTotalSeconds = INTERVAL_DEFAULT_MIN * 60;
+
+      fishingRemaining = fishingTotalSeconds;
+      intervalRemaining = intervalTotalSeconds;
+      elapsedSeconds = 0;
+
+      events = [];
+      pressureSamples = [];
+      intervalExpiredNotified = false;
+
+      updateTimers();
+      enableMainButtons(false);
+      initClock();
+      initWeather();
+    }
+
+    document.addEventListener("DOMContentLoaded", init);
+  </script>
 </body>
 </html>
