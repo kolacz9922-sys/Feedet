@@ -1050,19 +1050,33 @@ const btnVoice = document.getElementById("btnVoice");
 
 
 
- // -------------------------------------------------------
- // FULLSCREEN
- // -------------------------------------------------------
+// -------------------------------------------------------
+// FULLSCREEN
+// -------------------------------------------------------
 btnFullscreen.addEventListener("click", () => {
-  const doc = document;
   const el = document.documentElement;
-  const isFs = doc.fullscreenElement || doc.webkitFullscreenElement || doc.msFullscreenElement;
+  const isFs = document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
+
   if (!isFs) {
-    const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
-    if (req) req.call(el);
+    // Twarde, bezpośrednie wywołania wymagane przez przeglądarki mobilne
+    if (el.requestFullscreen) {
+      el.requestFullscreen().catch(() => alert("Przeglądarka zablokowała pełny ekran. Wyłącz Tarcze Brave."));
+    } else if (el.webkitRequestFullscreen) { 
+      el.webkitRequestFullscreen();
+    } else if (el.msRequestFullscreen) { 
+      el.msRequestFullscreen();
+    } else {
+      alert("Twój system (np. iOS Safari) nie obsługuje trybu pełnoekranowego dla stron WWW.");
+    }
   } else {
-    const exit = doc.exitFullscreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
-    if (exit) exit.call(doc);
+    // Bezpośrednie wyjście z pełnego ekranu
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    } else if (document.msExitFullscreen) {
+      document.msExitFullscreen();
+    }
   }
 });
 
