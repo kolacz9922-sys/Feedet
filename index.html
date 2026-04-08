@@ -1161,12 +1161,17 @@ function initVoice() {
     handleVoiceCommand(text);
   };
 
+  // restart z opóźnieniem — usuwa piknięcia
   recognition.onend = () => {
-    if (voiceActive) recognition.start();
+    if (voiceActive) {
+      setTimeout(() => recognition.start(), 500);
+    }
   };
 
   recognition.onerror = () => {
-    if (voiceActive) recognition.start();
+    if (voiceActive) {
+      setTimeout(() => recognition.start(), 500);
+    }
   };
 }
 
@@ -1207,6 +1212,12 @@ function handleVoiceCommand(cmd) {
   if (cmd.includes("trener wykres")) {
     const snap = currentSnapshot();
     showChartsForSession(snap);
+    return;
+  }
+
+  // --- ZAMKNIJ WYKRES ---
+  if (cmd.includes("trener zamknij wykres") || cmd.includes("trener zamknij")) {
+    closeModal("modalCharts");
     return;
   }
 
